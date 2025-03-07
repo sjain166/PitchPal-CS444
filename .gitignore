@@ -1,0 +1,16 @@
+# Python environment
+venv/
+
+# Data files
+data/
+
+# Jupyter notebook checkpoints
+**/.ipynb_checkpoints
+
+# OS-specific junk
+.DS_Store
+Thumbs.db
+
+# Cache & logs
+__pycache__/
+*.log
