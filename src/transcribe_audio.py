@@ -4,7 +4,7 @@ import whisper
 audio_path = "../data/Pitch-Sample/filler_sample.wav"
 model = whisper.load_model("base")
 
-print("🔄 Transcribing with CrisperWhisper...")
+print("🔄 Transcribing with Whisper...")
 result = model.transcribe(audio_path)
 
 transcription_path = "../data/Pitch-Sample/sample01_transcription.txt"
