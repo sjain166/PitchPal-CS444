@@ -1,6 +1,11 @@
 import os
 # Used for reading and processing video frames.
 
+"""
+This script extracts frames from a video file and saves them as images in a directory.
+It also extracts the audio from the video and saves it as a .wav file.
+"""
+
 import cv2
 from moviepy import VideoFileClip
 
@@ -10,8 +15,12 @@ frames_dir = "../data/frames/Pitch-Sample/sample01_frames"
 
 os.makedirs(frames_dir, exist_ok=True)
 
+if not os.path.exists(video_path):
+    print(f"❌ Error: Video file not found at {video_path}")
+    exit()
+
 clip = VideoFileClip(video_path)
-if clip.audio is not None:
+if clip.audio is not None and clip is not None:
     clip.audio.write_audiofile(audio_path)
     print(f"Audio extracted and saved to {audio_path}")
 else:
