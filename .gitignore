@@ -1,5 +1,6 @@
 # Python environment
 venv/
+myenv/
 
 # Data files
 data/
