@@ -4,7 +4,7 @@ from transformers import pipeline
 
 # ✅ Load AI-Based Profanity & Offensive Word Detection Models
 print("🔄 Loading Language Analysis Models...")
-profanity_pipe = pipeline("text-classification", model="mginoben/roberta-tagalog-profanity-classifier")
+profanity_pipe = pipeline("text-classification", model="facebook/roberta-hate-speech-dynabench-r4-target")
 offensive_pipe = pipeline("text-classification", model="cardiffnlp/twitter-roberta-base-offensive")
 
 # ✅ Define a List of Words That AI Models May Miss
