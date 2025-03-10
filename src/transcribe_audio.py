@@ -22,7 +22,7 @@ model = AutoModelForSpeechSeq2Seq.from_pretrained(
 processor = AutoProcessor.from_pretrained(model_id)
 
 # ✅ Define Audio Path
-audio_path = "../data/Pitch-Sample/audio_wav_1_35.wav"
+audio_path = "../data/Pitch-Sample/profanity_audio_11.wav"
 
 # ✅ Load and Convert Audio to 16kHz
 print("🔄 Loading and processing audio...")
@@ -98,7 +98,7 @@ for i, (chunk, chunk_start_time) in enumerate(zip(chunks, chunk_start_times)):
     transcribed_text += hf_pipeline_output["text"] + " "  # Merge results
 
 # ✅ Save Full Transcription to File
-transcription_path = "../data/Pitch-Sample/sample01_transcription.txt"
+transcription_path = "../data/Pitch-Sample/sample02_transcription.txt"
 with open(transcription_path, "w") as f:
     f.write(transcribed_text.strip())
 
