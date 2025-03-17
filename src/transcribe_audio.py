@@ -4,6 +4,7 @@ import numpy as np
 import json
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 import soundfile as sf
+import os
 
 # ✅ Define the Hugging Face Model ID
 model_id = "nyrahealth/CrisperWhisper"
@@ -22,7 +23,7 @@ model = AutoModelForSpeechSeq2Seq.from_pretrained(
 processor = AutoProcessor.from_pretrained(model_id)
 
 # ✅ Define Audio Path
-audio_path = "../data/Pitch-Sample/profanity_audio_11.wav"
+audio_path = "../data/Pitch-Sample/sample01.wav"
 
 # ✅ Load and Convert Audio to 16kHz
 print("🔄 Loading and processing audio...")
@@ -30,7 +31,7 @@ audio, sr = librosa.load(audio_path, sr=16000)  # Convert to 16kHz sample rate
 
 # ✅ Define Chunking Parameters
 chunk_length_s = 30  # 🔥 Max length Whisper can handle at once
-stride_length_s = 5   # 🔥 5s overlap ensures smooth transitions
+stride_length_s = 0.2   # 🔥 0.2s overlap ensures smooth transitions
 
 # ✅ Split Audio into Chunks
 def split_audio(audio, sr, chunk_length_s, stride_length_s):
@@ -62,12 +63,13 @@ pipe = pipeline(
 # ✅ Transcribe Each Chunk and Store Results with Correct Timestamps
 transcribed_text = ""
 word_timestamps = {}  # Dictionary to store timestamps per word
+temp_chunk_files = []  # List to keep track of temporary chunk files
 
 for i, (chunk, chunk_start_time) in enumerate(zip(chunks, chunk_start_times)):
     print(f"🔄 Transcribing chunk {i+1}/{len(chunks)}...")
     chunk_audio_path = f"temp_chunk_{i}.wav"
     sf.write(chunk_audio_path, chunk, sr)  # Save temp chunk
-
+    temp_chunk_files.append(chunk_audio_path)
     hf_pipeline_output = pipe(chunk_audio_path)  # Run transcription
 
     # ✅ Check if output contains timestamps
@@ -96,6 +98,16 @@ for i, (chunk, chunk_start_time) in enumerate(zip(chunks, chunk_start_times)):
         print(f"⚠️ Warning: No timestamps found in chunk {i+1}")
 
     transcribed_text += hf_pipeline_output["text"] + " "  # Merge results
+
+# ✅ Delete Temporary Chunk Files
+print("🗑️ Deleting temporary chunk files...")
+for temp_file in temp_chunk_files:
+    try:
+        os.remove(temp_file)
+        print(f"✅ Deleted: {temp_file}")
+    except OSError as e:
+        print(f"⚠️ Error deleting {temp_file}: {e}")
+
 
 # ✅ Save Full Transcription to File
 transcription_path = "../data/Pitch-Sample/sample02_transcription.txt"
