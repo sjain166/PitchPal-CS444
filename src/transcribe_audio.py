@@ -30,7 +30,7 @@ audio, sr = librosa.load(audio_path, sr=16000)  # Convert to 16kHz sample rate
 
 # ✅ Define Chunking Parameters
 chunk_length_s = 30  # 🔥 Max length Whisper can handle at once
-stride_length_s = 0.2   # 🔥 Use a larger stride to avoid missing words
+stride_length_s = 5   # 🔥 5s overlap ensures smooth transitions
 
 # ✅ Split Audio into Chunks
 def split_audio(audio, sr, chunk_length_s, stride_length_s):
