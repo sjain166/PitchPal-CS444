@@ -2,6 +2,10 @@ import json
 import re
 from transformers import pipeline
 
+transcription_path = "../../data/Pitch-Sample/sample02_transcription.txt"
+timestamp_data_path = "../../data/Pitch-Sample/sample02_timestamps.json"
+report_path = "../../data/Pitch-Sample/Results/profanity_report.json"
+
 print("🔄 Loading Language Analysis Models...")
 # Detects racial slurs
 profanity_pipe = pipeline("text-classification", model="facebook/roberta-hate-speech-dynabench-r4-target")
@@ -19,12 +23,10 @@ UNPROFESSIONAL_WORDS = {
 }
 
 # Load Transcribed Text
-transcription_path = "../../data/Pitch-Sample/sample02_transcription.txt"
 with open(transcription_path, "r") as f:
     transcribed_text = f.read()
 
 # Load Word-Level Timestamps
-timestamp_data_path = "../../data/Pitch-Sample/sample01_timestamps.json"
 with open(timestamp_data_path, "r") as f:
     timestamps = json.load(f)
 
@@ -68,7 +70,6 @@ for word, time_data_list in timestamps.items():
         })
 
 # Save Filtered Words Analysis Report
-report_path = "../../data/Pitch-Sample/profanity_report.json"
 with open(report_path, "w") as f:
     json.dump(filtered_results, f, indent=4)
 
