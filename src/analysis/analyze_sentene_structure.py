@@ -2,7 +2,6 @@ import re
 import spacy
 import os
 from sentence_transformers import SentenceTransformer, util
-from datasets import load_dataset
 nlp = spacy.load("en_core_web_sm")
 
 input_file = "../../data/Pitch-Sample/sample01_transcription.txt"
