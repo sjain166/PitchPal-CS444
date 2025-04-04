@@ -1,15 +1,21 @@
 import librosa
 import numpy as np
 import json
+import os
 import matplotlib.pyplot as plt
 import librosa.display
+import argparse
 
-# ✅ Load Audio
-audio_path = "../../data/Pitch-Sample/confidence_5.wav"
-json_path = "../../data/Pitch-Sample/Results/confidence_intervals.json"
-y, sr = librosa.load(audio_path, sr=None)
+# CLI Arguments
+parser = argparse.ArgumentParser(description="Confidence interval analysis using RMS energy")
+parser.add_argument("audio_path", help="Path to the input .wav audio file")
+parser.add_argument("json_output_path", help="Path to store the JSON result file")
+parser.add_argument("plot_output_path", help="Path to store the confidence plot image (PNG)")
+args = parser.parse_args()
 
-# ✅ Parameters
+y, sr = librosa.load(args.audio_path, sr=None)
+
+# Parameters
 frame_length = 2048
 hop_length = 512
 SILENCE_THRESHOLD = 0.005
@@ -91,11 +97,12 @@ intervals["underconfident"] = merge_intervals(filter_silent_intervals(intervals[
 intervals["overconfident"] = merge_intervals(filter_silent_intervals(intervals["overconfident"]), max_merge_gap=1.0)
 
 # ✅ Save output
-with open(json_path, "w") as f:
+os.makedirs(os.path.dirname(args.json_output_path), exist_ok=True)
+with open(args.json_output_path, "w") as f:
     json.dump(intervals, f, indent=4)
 
 # ✅ Plot
-plot_path = "../Pitch-Sample/Results/confidence_plot.png"
+os.makedirs(os.path.dirname(args.plot_output_path), exist_ok=True)
 plt.figure(figsize=(12, 4))
 librosa.display.waveshow(y, sr=sr, alpha=0.5, label="Waveform")
 plt.plot(times, rms, label="RMS Energy", color='black')
@@ -106,5 +113,5 @@ plt.ylabel("RMS Energy")
 plt.title("Confidence Analysis Based on RMS Energy")
 plt.legend()
 plt.tight_layout()
-plt.savefig(plot_path)
+plt.savefig(args.plot_output_path)
 plt.close()

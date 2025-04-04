@@ -1,10 +1,18 @@
 import json
 import re
 from transformers import pipeline
+import argparse
+import os
 
-transcription_path = "../../data/Pitch-Sample/sample02_transcription.txt"
-timestamp_data_path = "../../data/Pitch-Sample/sample02_timestamps.json"
-report_path = "../../data/Pitch-Sample/Results/profanity_report.json"
+parser = argparse.ArgumentParser(description="Detect profanity and unprofessional language")
+parser.add_argument("timestamp_path", help="Path to timestamps JSON file")
+parser.add_argument("transcription_path", help="Path to transcription text file")
+parser.add_argument("--report_path", default="./tests/results/profanity_report.json", help="Output path for the report JSON")
+args = parser.parse_args()
+transcription_path = args.transcription_path
+timestamp_data_path = args.timestamp_path
+report_path = args.report_path
+os.makedirs(os.path.dirname(report_path), exist_ok=True)
 
 print("🔄 Loading Language Analysis Models...")
 # Detects racial slurs

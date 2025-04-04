@@ -1,11 +1,17 @@
 import re
 import spacy
 import os
+import json
+import argparse
 from sentence_transformers import SentenceTransformer, util
 nlp = spacy.load("en_core_web_sm")
 
-input_file = "../../data/Pitch-Sample/sample01_transcription.txt"
-output_file = "../../data/Pitch-Sample/Results/english_sentence_transcription.json"
+parser = argparse.ArgumentParser(description="Analyze sentence structure and relevance.")
+parser.add_argument("timestamp_path", help="Path to timestamps JSON file")
+parser.add_argument("transcription_path", help="Path to transcription .txt file")
+args = parser.parse_args()
+input_file = args.transcription_path
+
 LOW_RELEVANCE_THRESHOLD = 0.15
 WEAK_RELEVANCE_THRESHOLD = 0.25
 
@@ -76,10 +82,25 @@ def suggest_improvement(sentence, relevance_score, sentence_embedding):
         )
 
 # Print analysis
+# for i, sentence in enumerate(meaningful_sentences):
+#     print(f"\n🔹 Sentence {i+1}: {sentence}")
+#     print(f"   - Coherence Score: {coherence_scores[i]:.2f}")
+#     print(f"   - Elevator Pitch Relevance: {pitch_relevance[i]:.2f}")
+#     suggestion = suggest_improvement(sentence, pitch_relevance[i], embeddings[i])
+#     if suggestion:
+#         print(f"   💡 Suggestion: {suggestion}")
+summary_output = []
 for i, sentence in enumerate(meaningful_sentences):
-    print(f"\n🔹 Sentence {i+1}: {sentence}")
-    print(f"   - Coherence Score: {coherence_scores[i]:.2f}")
-    print(f"   - Elevator Pitch Relevance: {pitch_relevance[i]:.2f}")
     suggestion = suggest_improvement(sentence, pitch_relevance[i], embeddings[i])
-    if suggestion:
-        print(f"   💡 Suggestion: {suggestion}")
+    summary_output.append({
+        "sentence": sentence,
+        "coherence_score": round(coherence_scores[i], 2),
+        "relevance_score": round(pitch_relevance[i], 2),
+        "suggestion": suggestion or "✅ Looks good!"
+    })
+
+# Save to JSON
+output_path = "./tests/results/sentence_analysis_report.json"
+os.makedirs(os.path.dirname(output_path), exist_ok=True)
+with open(output_path, "w") as f:
+    json.dump(summary_output, f, indent=4)
