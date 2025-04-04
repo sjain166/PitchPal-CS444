@@ -19,10 +19,8 @@ y, sr = librosa.load(args.audio_path, sr=None)
 frame_length = 2048
 hop_length = 512
 SILENCE_THRESHOLD = 0.005
-MIN_DURATION = 2.0
-
-NORMAL_MIN = 0.025
-NORMAL_MAX = 0.05
+WINDOW_SIZE = 2.0
+STEP_SIZE = 1.0
 
 # ✅ Initialize intervals
 intervals = {
@@ -34,10 +32,11 @@ intervals = {
 rms = librosa.feature.rms(y=y, frame_length=frame_length, hop_length=hop_length)[0]
 times = librosa.frames_to_time(np.arange(len(rms)), sr=sr, hop_length=hop_length)
 
-# ✅ Sliding window
-WINDOW_SIZE = 2.0
-STEP_SIZE = 1.0
+# ✅ Dynamic thresholds
+NORMAL_MIN = np.percentile(rms, 25)
+NORMAL_MAX = np.percentile(rms, 75)
 
+# ✅ Sliding window logic
 def compute_area_between_bounds(rms_segment, time_segment, lower, upper):
     mask = (rms_segment >= lower) & (rms_segment <= upper)
     return np.trapz(rms_segment[mask], time_segment[mask])
@@ -63,7 +62,7 @@ while end <= times[-1]:
         continue
 
     over_area = compute_area_between_bounds(rms_seg, time_seg, NORMAL_MAX, np.inf)
-    under_area = compute_area_between_bounds(rms_seg, time_seg, 0, NORMAL_MIN)
+    under_area = compute_area_between_bounds(rms_seg, time_seg, -np.inf, NORMAL_MIN)
 
     over_ratio = over_area / total_area
     under_ratio = under_area / total_area
@@ -76,7 +75,7 @@ while end <= times[-1]:
     start += STEP_SIZE
     end += STEP_SIZE
 
-# ✅ Merge Intervals
+# Merge and filter intervals
 def merge_intervals(intervals, gap_threshold=0.5, max_merge_gap=2.0):
     if not intervals:
         return []
@@ -93,21 +92,50 @@ def merge_intervals(intervals, gap_threshold=0.5, max_merge_gap=2.0):
 def filter_silent_intervals(interval_list):
     return [i for i in interval_list if i["start"] > 0.5]
 
-intervals["underconfident"] = merge_intervals(filter_silent_intervals(intervals["underconfident"]), max_merge_gap=1.0)
-intervals["overconfident"] = merge_intervals(filter_silent_intervals(intervals["overconfident"]), max_merge_gap=1.0)
+def filter_significant_intervals(intervals, kind="overconfident", min_duration=1.0, std_threshold=0.7):
+    filtered = []
+    global_mean = np.mean(rms)
+    global_std = np.std(rms)
+    for interval in intervals:
+        start_idx = np.searchsorted(times, interval["start"])
+        end_idx = np.searchsorted(times, interval["end"])
+        rms_segment = rms[start_idx:end_idx]
+        duration = interval["end"] - interval["start"]
 
-# ✅ Save output
+        if len(rms_segment) == 0 or duration < min_duration:
+            continue
+
+        mean_rms = np.mean(rms_segment)
+
+        if kind == "overconfident" and mean_rms > global_mean + std_threshold * global_std:
+            filtered.append(interval)
+        elif kind == "underconfident" and mean_rms < global_mean - std_threshold * global_std:
+            filtered.append(interval)
+
+    return filtered
+
+intervals["underconfident"] = filter_significant_intervals(
+    merge_intervals(filter_silent_intervals(intervals["underconfident"]), max_merge_gap=1.0),
+    kind="underconfident", min_duration=1.0, std_threshold=0.1
+)
+
+intervals["overconfident"] = filter_significant_intervals(
+    merge_intervals(filter_silent_intervals(intervals["overconfident"]), max_merge_gap=1.0),
+    kind="overconfident", min_duration=1.0, std_threshold=0.1
+)
+
+# ✅ Save JSON output
 os.makedirs(os.path.dirname(args.json_output_path), exist_ok=True)
 with open(args.json_output_path, "w") as f:
     json.dump(intervals, f, indent=4)
 
-# ✅ Plot
+# ✅ Save plot
 os.makedirs(os.path.dirname(args.plot_output_path), exist_ok=True)
 plt.figure(figsize=(12, 4))
 librosa.display.waveshow(y, sr=sr, alpha=0.5, label="Waveform")
 plt.plot(times, rms, label="RMS Energy", color='black')
-plt.axhline(NORMAL_MAX, color='green', linestyle='--', label="Normal Max (0.05)")
-plt.axhline(NORMAL_MIN, color='red', linestyle='--', label="Normal Min (0.025)")
+plt.axhline(NORMAL_MAX, color='green', linestyle='--', label=f"Dynamic Max ({NORMAL_MAX:.3f})")
+plt.axhline(NORMAL_MIN, color='red', linestyle='--', label=f"Dynamic Min ({NORMAL_MIN:.3f})")
 plt.xlabel("Time (s)")
 plt.ylabel("RMS Energy")
 plt.title("Confidence Analysis Based on RMS Energy")
