@@ -4,6 +4,7 @@ myenv/
 
 # Data files
 data/
+src/tests/
 
 # Jupyter notebook checkpoints
 **/.ipynb_checkpoints

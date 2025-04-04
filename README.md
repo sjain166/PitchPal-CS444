@@ -1,4 +1,11 @@
 # PitchPal-CS444
+## Run Automation
+```
+source myenv/bin/activate
+cd src
+python automation.py ../data/Pitch-Sample/{.wav file-name}
+```
+`Tests will be accumulated in the "src/tests/results" folder`
 
 ### Activate Python "myenv":
 `source myenv/bin/activate`
