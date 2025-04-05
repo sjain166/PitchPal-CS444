@@ -38,7 +38,7 @@ def main():
     analysis_scripts_once = [
         "analyze_profanity.py",
         # "analyze_sentence_structure.py",
-        # "analyze_word_freq.py",
+        "analyze_word_freq.py",
     ]
     for script in analysis_scripts_once:
         script_path = os.path.join(analysis_folder, script)
