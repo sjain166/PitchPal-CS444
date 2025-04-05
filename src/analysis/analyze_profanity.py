@@ -1,59 +1,71 @@
 import json
-import re
 from transformers import pipeline
 import argparse
+import re
 import os
 
+# Set up argument parser for command line inputs
 parser = argparse.ArgumentParser(description="Detect profanity and unprofessional language")
 parser.add_argument("timestamp_path", help="Path to timestamps JSON file")
 parser.add_argument("transcription_path", help="Path to transcription text file")
 parser.add_argument("--report_path", default="./tests/results/profanity_report.json", help="Output path for the report JSON")
 args = parser.parse_args()
+
+# Assign command line arguments to variables
 transcription_path = args.transcription_path
 timestamp_data_path = args.timestamp_path
 report_path = args.report_path
+
+# Create directory for report if it doesn't exist
 os.makedirs(os.path.dirname(report_path), exist_ok=True)
 
-print("🔄 Loading Language Analysis Models...")
-# Detects racial slurs
+# Load language analysis models for detecting profanity and offensive language
 profanity_pipe = pipeline("text-classification", model="facebook/roberta-hate-speech-dynabench-r4-target")
-# Filters out offensive words
 offensive_pipe = pipeline("text-classification", model="cardiffnlp/twitter-roberta-base-offensive")
 
-# Define a List of Words That AI Models May Miss
-HARDCODED_PROFANITY = [
-    r"nigg[a|er|uh|ah|as]*",
+# Define a set of unprofessional words that are not profane but unsuitable for a pitch
+UNPROFESSIONAL_PATTERNS = [
+    r"\bgonn?a\b",
+    r"\bwann?a\b",
+    r"\bgotta\b",
+    r"\bain['’`]?t\b",
+    r"\bdude\b",
+    r"\bbro+\b",
+    r"\byo+\b",
+    r"\bnah+\b",
+    r"\bbruh\b",
+    r"\bsup\b",
+    r"\bcuz\b",
+    r"\bshit\b", r"\bdamn\b", r"\bcrap\b", r"\bhell\b", r"\bfreakin\b", r"\bfrick\b", r"\bsucks\b", r"\bbloody\b",
+    r"\bkinda\b", r"\bsorta\b",
+    r"\bthingy\b",
+    r"\bwhatev[ae]r\b",
+    r"\blowkey\b",
+    r"\bhighkey\b",
+    r"\bnigg(a|ah|as|az|er|ers|uh|urs)?\b"
 ]
 
-# Define Additional "Unprofessional" Words (Non-profane, but not suitable for a pitch)
-UNPROFESSIONAL_WORDS = {
-    "gonna", "wanna", "ain’t", "dude", "bro", "yo", "shit", "damn", "crap", "hell", "kinda", "sorta"
-}
-
-# Load Transcribed Text
+# Load the transcribed text from the specified file
 with open(transcription_path, "r") as f:
     transcribed_text = f.read()
 
-# Load Word-Level Timestamps
+# Load word-level timestamps from the specified JSON file
 with open(timestamp_data_path, "r") as f:
     timestamps = json.load(f)
 
-# Analyze Each Word for Profanity & Unprofessional Speech
+# Initialize a list to hold filtered results of profanity and unprofessional speech
 filtered_results = []
-for word, time_data_list in timestamps.items():
-    word_lower = word.lower().strip()  # Normalize word
 
-    # Check Against Predefined List of Unprofessional Words
-    if word_lower in UNPROFESSIONAL_WORDS:
+# Analyze each word from the transcription against predefined categories
+for word, time_data_list in timestamps.items():
+    word_lower = word.lower().strip()  # Normalize the word to lowercase and remove whitespace
+
+    # Check if the word is in the set of unprofessional words
+    if any(re.search(pattern, word_lower) for pattern in UNPROFESSIONAL_PATTERNS):
         category = "unprofessional"
         confidence = 0.99
 
-    # Check Hardcoded Profanity (Regex Match)
-    elif any(re.match(pattern, word_lower) for pattern in HARDCODED_PROFANITY):
-        category = "profanity"
-        confidence = 1.0
-
-    # Check AI-Based Models for Profanity/Offensive Words
+    # Use AI models to check for profanity or offensive words
     else:
         result1 = profanity_pipe(word_lower)[0]
         result2 = offensive_pipe(word_lower)[0]
@@ -67,7 +79,7 @@ for word, time_data_list in timestamps.items():
         else:
             continue
 
-    # Store Results for Each Occurrence of the Word
+    # Store the results for each occurrence of the word along with its timestamps
     for time_data in time_data_list:
         filtered_results.append({
             "word": word,
@@ -77,15 +89,9 @@ for word, time_data_list in timestamps.items():
             "confidence": confidence
         })
 
-# Save Filtered Words Analysis Report
+# Save the filtered analysis report to the specified JSON file
 with open(report_path, "w") as f:
     json.dump(filtered_results, f, indent=4)
 
-# Print Summary
-print("✅ Language Analysis Complete!")
-print(f"🚨 {len(filtered_results)} inappropriate words detected.")
-print(f"🔍 Report saved to: {report_path}")
-
-# Print Results
-for instance in filtered_results:
-    print(f"🚨 {instance['category'].upper()} | {instance['word']} at {instance['start']}s (Confidence: {instance['confidence']:.2f})")
+# Print summary of the analysis
+print(f"✅ Profanity Report saved to: {report_path}")
