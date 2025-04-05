@@ -108,6 +108,5 @@ with open(timestamp_path, "w") as f:
     json.dump(word_timestamps, f, indent=4)
 
 # Print Final Output
-print("✅ Transcription complete! Saved to:", transcription_path)
-print("🔍 Timestamps saved to:", timestamp_path)
-print("Transcribed Text:", transcribed_text.strip())
+print("✅ Transcription saved to: ", transcription_path)
+print("✅ Timestamps saved to:", timestamp_path)

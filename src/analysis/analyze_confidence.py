@@ -13,129 +13,87 @@ parser.add_argument("json_output_path", help="Path to store the JSON result file
 parser.add_argument("plot_output_path", help="Path to store the confidence plot image (PNG)")
 args = parser.parse_args()
 
+# Load audio
 y, sr = librosa.load(args.audio_path, sr=None)
+rms = librosa.feature.rms(y=y)[0]
+times = librosa.frames_to_time(np.arange(len(rms)), sr=sr)
 
 # Parameters
-frame_length = 2048
-hop_length = 512
-SILENCE_THRESHOLD = 0.005
-WINDOW_SIZE = 2.0
-STEP_SIZE = 1.0
+WINDOW_SIZE = 2.0  # seconds
+STEP_SIZE = 1.0  # seconds
+SILENCE_THRESHOLD = 0.005  # RMS energy below this is silence
+MIN_DURATION = 2.0  # seconds
 
-# ✅ Initialize intervals
+# Dynamic thresholds (exclude silence from percentile)
+non_silent_rms = rms[rms > SILENCE_THRESHOLD]
+NORMAL_MIN = np.percentile(non_silent_rms, 25)
+NORMAL_MAX = np.percentile(non_silent_rms, 75)
+
 intervals = {
-    "underconfident": [],
-    "overconfident": []
+    "overconfidence": [],
+    "underconfidence": []
 }
 
-# ✅ Compute RMS
-rms = librosa.feature.rms(y=y, frame_length=frame_length, hop_length=hop_length)[0]
-times = librosa.frames_to_time(np.arange(len(rms)), sr=sr, hop_length=hop_length)
+# Confidence tagging using RMS window analysis
+def analyze_intervals(rms, times, min_thres, max_thres):
+    start = 0
+    end = WINDOW_SIZE
+    while end <= times[-1]:
+        start_idx = np.searchsorted(times, start)
+        end_idx = np.searchsorted(times, end)
 
-# ✅ Dynamic thresholds
-NORMAL_MIN = np.percentile(rms, 25)
-NORMAL_MAX = np.percentile(rms, 75)
-
-# ✅ Sliding window logic
-def compute_area_between_bounds(rms_segment, time_segment, lower, upper):
-    mask = (rms_segment >= lower) & (rms_segment <= upper)
-    return np.trapz(rms_segment[mask], time_segment[mask])
-
-start = 0
-end = WINDOW_SIZE
-
-while end <= times[-1]:
-    start_idx = np.searchsorted(times, start)
-    end_idx = np.searchsorted(times, end)
-    rms_seg = rms[start_idx:end_idx]
-    time_seg = times[start_idx:end_idx]
-
-    if len(rms_seg) == 0 or np.mean(rms_seg) < SILENCE_THRESHOLD:
-        start += STEP_SIZE
-        end += STEP_SIZE
-        continue
-
-    total_area = np.trapz(rms_seg, time_seg)
-    if total_area == 0:
-        start += STEP_SIZE
-        end += STEP_SIZE
-        continue
-
-    over_area = compute_area_between_bounds(rms_seg, time_seg, NORMAL_MAX, np.inf)
-    under_area = compute_area_between_bounds(rms_seg, time_seg, -np.inf, NORMAL_MIN)
-
-    over_ratio = over_area / total_area
-    under_ratio = under_area / total_area
-
-    if over_ratio > 0.7 and over_area > 0.01:
-        intervals["overconfident"].append({"start": round(start, 2), "end": round(end, 2)})
-    elif under_ratio > 0.7 and under_area > 0.01:
-        intervals["underconfident"].append({"start": round(start, 2), "end": round(end, 2)})
-
-    start += STEP_SIZE
-    end += STEP_SIZE
-
-# Merge and filter intervals
-def merge_intervals(intervals, gap_threshold=0.5, max_merge_gap=2.0):
-    if not intervals:
-        return []
-    intervals = sorted(intervals, key=lambda x: x["start"])
-    merged = [intervals[0]]
-    for current in intervals[1:]:
-        last = merged[-1]
-        if current["start"] - last["end"] <= gap_threshold and current["start"] - last["end"] <= max_merge_gap:
-            last["end"] = max(last["end"], current["end"])
-        else:
-            merged.append(current)
-    return [{"start": round(i["start"], 2), "end": round(i["end"], 2)} for i in merged]
-
-def filter_silent_intervals(interval_list):
-    return [i for i in interval_list if i["start"] > 0.5]
-
-def filter_significant_intervals(intervals, kind="overconfident", min_duration=1.0, std_threshold=0.7):
-    filtered = []
-    global_mean = np.mean(rms)
-    global_std = np.std(rms)
-    for interval in intervals:
-        start_idx = np.searchsorted(times, interval["start"])
-        end_idx = np.searchsorted(times, interval["end"])
-        rms_segment = rms[start_idx:end_idx]
-        duration = interval["end"] - interval["start"]
-
-        if len(rms_segment) == 0 or duration < min_duration:
+        if end_idx - start_idx < 2:
+            start += STEP_SIZE
+            end += STEP_SIZE
             continue
 
-        mean_rms = np.mean(rms_segment)
+        rms_seg = rms[start_idx:end_idx]
+        time_seg = times[start_idx:end_idx]
 
-        if kind == "overconfident" and mean_rms > global_mean + std_threshold * global_std:
-            filtered.append(interval)
-        elif kind == "underconfident" and mean_rms < global_mean - std_threshold * global_std:
-            filtered.append(interval)
+        avg_rms = np.mean(rms_seg)
+        if avg_rms < SILENCE_THRESHOLD:
+            start += STEP_SIZE
+            end += STEP_SIZE
+            continue
 
-    return filtered
+        if avg_rms < min_thres:
+            intervals["underconfidence"].append({"start_time": round(start, 2), "end_time": round(end, 2)})
+        elif avg_rms > max_thres:
+            intervals["overconfidence"].append({"start_time": round(start, 2), "end_time": round(end, 2)})
 
-intervals["underconfident"] = filter_significant_intervals(
-    merge_intervals(filter_silent_intervals(intervals["underconfident"]), max_merge_gap=1.0),
-    kind="underconfident", min_duration=1.0, std_threshold=0.1
-)
+        start += STEP_SIZE
+        end += STEP_SIZE
 
-intervals["overconfident"] = filter_significant_intervals(
-    merge_intervals(filter_silent_intervals(intervals["overconfident"]), max_merge_gap=1.0),
-    kind="overconfident", min_duration=1.0, std_threshold=0.1
-)
+analyze_intervals(rms, times, NORMAL_MIN, NORMAL_MAX)
 
-# ✅ Save JSON output
+# Merge overlapping intervals
+def merge_chunks(intervals):
+    if not intervals:
+        return []
+    merged = [intervals[0]]
+    for curr in intervals[1:]:
+        prev = merged[-1]
+        if curr["start_time"] <= prev["end_time"]:
+            prev["end_time"] = max(prev["end_time"], curr["end_time"])
+        else:
+            merged.append(curr)
+    return [i for i in merged if i["end_time"] - i["start_time"] >= MIN_DURATION]
+
+intervals["underconfidence"] = merge_chunks(sorted(intervals["underconfidence"], key=lambda x: x["start_time"]))
+intervals["overconfidence"] = merge_chunks(sorted(intervals["overconfidence"], key=lambda x: x["start_time"]))
+
+# Save JSON result
 os.makedirs(os.path.dirname(args.json_output_path), exist_ok=True)
 with open(args.json_output_path, "w") as f:
     json.dump(intervals, f, indent=4)
 
-# ✅ Save plot
+# Save plot
 os.makedirs(os.path.dirname(args.plot_output_path), exist_ok=True)
 plt.figure(figsize=(12, 4))
 librosa.display.waveshow(y, sr=sr, alpha=0.5, label="Waveform")
 plt.plot(times, rms, label="RMS Energy", color='black')
-plt.axhline(NORMAL_MAX, color='green', linestyle='--', label=f"Dynamic Max ({NORMAL_MAX:.3f})")
-plt.axhline(NORMAL_MIN, color='red', linestyle='--', label=f"Dynamic Min ({NORMAL_MIN:.3f})")
+plt.axhline(NORMAL_MAX, color='green', linestyle='--', label=f"Overconfident Thresh ({NORMAL_MAX:.3f})")
+plt.axhline(NORMAL_MIN, color='red', linestyle='--', label=f"Underconfident Thresh ({NORMAL_MIN:.3f})")
 plt.xlabel("Time (s)")
 plt.ylabel("RMS Energy")
 plt.title("Confidence Analysis Based on RMS Energy")
@@ -143,3 +101,5 @@ plt.legend()
 plt.tight_layout()
 plt.savefig(args.plot_output_path)
 plt.close()
+
+print(f"✅ Confidence Report saved to: {args.json_output_path}")
