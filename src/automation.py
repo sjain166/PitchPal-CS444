@@ -29,6 +29,7 @@ def main():
     # Define paths
     timestamp_json = "./tests/timestamp.json"
     transcription_txt = "./tests/transcription.txt"
+    profanity_report_json = "./tests/results/profanity_report.json"
     analysis_folder = "./analysis"
     results_folder = "./tests/results"
     os.makedirs(results_folder, exist_ok=True)
@@ -36,13 +37,16 @@ def main():
     # Run 3 analysis scripts once
     print("🧠 Running global analysis scripts...")
     analysis_scripts_once = [
-        "analyze_profanity.py",
-        # "analyze_sentence_structure.py",
-        "analyze_word_freq.py",
+        # "analyze_profanity.py",
+        "analyze_sentence_structure.py",
+        # "analyze_word_freq.py",
     ]
     for script in analysis_scripts_once:
         script_path = os.path.join(analysis_folder, script)
-        run_script(script_path, [timestamp_json, transcription_txt])
+        if script == "analyze_sentence_structure.py":
+            run_script(script_path, [timestamp_json, transcription_txt, profanity_report_json])
+        else:
+            run_script(script_path, [timestamp_json, transcription_txt])
     
     # Run 4th script per chunk
     print("🔁 Running per-chunk analysis...")
