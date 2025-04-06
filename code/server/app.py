@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app)
 
 UPLOAD_FOLDER = './uploads'
-RESULTS_FOLDER = './tests/results'
+RESULTS_FOLDER = '../../src/tests/results'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route('/analyze', methods=['POST'])
@@ -24,9 +24,11 @@ def analyze_audio():
     filepath = os.path.join(UPLOAD_FOLDER, filename)
     audio_file.save(filepath)
 
-    # Run automation.py with the uploaded audio
+    # Run automation.py with proper working directory
+    automation_path = '/Users/aryangupta/Desktop/UIUC/CURRENT/CS-444/PitchPal-CS444/src/automation.py'
+    working_dir = '/Users/aryangupta/Desktop/UIUC/CURRENT/CS-444/PitchPal-CS444/src'
     try:
-        result = subprocess.run(['python3', '/Users/aryangupta/Desktop/UIUC/CURRENT/CS-444/PitchPal-CS444/src/automation.py', filepath], check=True)
+        result = subprocess.run(['python3', automation_path, os.path.abspath(filepath)], cwd=working_dir, check=True)
     except subprocess.CalledProcessError:
         return jsonify({"error": "Failed to process audio"}), 500
 
