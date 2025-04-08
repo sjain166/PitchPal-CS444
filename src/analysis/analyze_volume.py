@@ -7,10 +7,10 @@ import librosa.display
 import argparse
 
 # CLI Arguments
-parser = argparse.ArgumentParser(description="Confidence interval analysis using RMS energy")
+parser = argparse.ArgumentParser(description="Volume interval analysis using RMS energy")
 parser.add_argument("audio_path", help="Path to the input .wav audio file")
-parser.add_argument("json_output_path", help="Path to store the JSON result file")
-parser.add_argument("plot_output_path", help="Path to store the confidence plot image (PNG)")
+parser.add_argument("--json_output_path", default="./tests/results/volume_report.json", help="Path to store the JSON result file")
+parser.add_argument("--plot_output_path", default="./tests/results/volume_plot.png", help="Path to store the volume plot image (PNG)")
 args = parser.parse_args()
 
 # Load audio
@@ -30,8 +30,8 @@ NORMAL_MIN = np.percentile(non_silent_rms, 25)
 NORMAL_MAX = np.percentile(non_silent_rms, 75)
 
 intervals = {
-    "overconfidence": [],
-    "underconfidence": []
+    "loud": [],
+    "inaudible": []
 }
 
 # Confidence tagging using RMS window analysis
@@ -57,9 +57,9 @@ def analyze_intervals(rms, times, min_thres, max_thres):
             continue
 
         if avg_rms < min_thres:
-            intervals["underconfidence"].append({"start_time": round(start, 2), "end_time": round(end, 2)})
+            intervals["inaudible"].append({"start_time": round(start, 2), "end_time": round(end, 2)})
         elif avg_rms > max_thres:
-            intervals["overconfidence"].append({"start_time": round(start, 2), "end_time": round(end, 2)})
+            intervals["loud"].append({"start_time": round(start, 2), "end_time": round(end, 2)})
 
         start += STEP_SIZE
         end += STEP_SIZE
@@ -79,8 +79,8 @@ def merge_chunks(intervals):
             merged.append(curr)
     return [i for i in merged if i["end_time"] - i["start_time"] >= MIN_DURATION]
 
-intervals["underconfidence"] = merge_chunks(sorted(intervals["underconfidence"], key=lambda x: x["start_time"]))
-intervals["overconfidence"] = merge_chunks(sorted(intervals["overconfidence"], key=lambda x: x["start_time"]))
+intervals["inaudible"] = merge_chunks(sorted(intervals["inaudible"], key=lambda x: x["start_time"]))
+intervals["loud"] = merge_chunks(sorted(intervals["loud"], key=lambda x: x["start_time"]))
 
 # Save JSON result
 os.makedirs(os.path.dirname(args.json_output_path), exist_ok=True)
@@ -92,14 +92,14 @@ os.makedirs(os.path.dirname(args.plot_output_path), exist_ok=True)
 plt.figure(figsize=(12, 4))
 librosa.display.waveshow(y, sr=sr, alpha=0.5, label="Waveform")
 plt.plot(times, rms, label="RMS Energy", color='black')
-plt.axhline(NORMAL_MAX, color='green', linestyle='--', label=f"Overconfident Thresh ({NORMAL_MAX:.3f})")
-plt.axhline(NORMAL_MIN, color='red', linestyle='--', label=f"Underconfident Thresh ({NORMAL_MIN:.3f})")
+plt.axhline(NORMAL_MAX, color='green', linestyle='--', label=f"Loud Thresh ({NORMAL_MAX:.3f})")
+plt.axhline(NORMAL_MIN, color='red', linestyle='--', label=f"Inaudible Thresh ({NORMAL_MIN:.3f})")
 plt.xlabel("Time (s)")
 plt.ylabel("RMS Energy")
-plt.title("Confidence Analysis Based on RMS Energy")
+plt.title("Volume Analysis Based on RMS Energy")
 plt.legend()
 plt.tight_layout()
 plt.savefig(args.plot_output_path)
 plt.close()
 
-print(f"✅ Confidence Report saved to: {args.json_output_path}")
+print(f"✅ Volume Analysis Report saved to: {args.json_output_path}")

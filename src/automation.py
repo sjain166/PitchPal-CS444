@@ -40,29 +40,16 @@ def main():
         "analyze_profanity.py",
         "analyze_sentence_structure.py",
         "analyze_word_freq.py",
+        "analyze_volume.py",
     ]
     for script in analysis_scripts_once:
         script_path = os.path.join(analysis_folder, script)
         if script == "analyze_sentence_structure.py":
             run_script(script_path, [timestamp_json, transcription_txt, profanity_report_json])
+        elif script == "analyze_volume.py":
+            run_script(script_path, [audio_path])
         else:
             run_script(script_path, [timestamp_json, transcription_txt])
-    
-    # Run 4th script per chunk
-    print("🔁 Running per-chunk analysis...")
-    chunk_files = sorted(glob.glob("./tests/temp_chunk_*.wav"))
-
-    confidence_script = os.path.join(analysis_folder, "analyze_confidence.py")
-
-    for chunk_path in chunk_files:
-        chunk_name = os.path.splitext(os.path.basename(chunk_path))[0]
-        chunk_result_dir = os.path.join(results_folder, chunk_name)
-        os.makedirs(chunk_result_dir, exist_ok=True)
-
-        # Run analyze_confidence.py (RMS analysis with plot and JSON output)
-        json_output_path = os.path.join(chunk_result_dir, "confidence_report.json")
-        plot_output_path = os.path.join(chunk_result_dir, "confidence_plot.png")
-        run_script(confidence_script, [chunk_path, json_output_path, plot_output_path])
 
     print("✅ All tasks completed successfully.")
 

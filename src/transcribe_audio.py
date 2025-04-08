@@ -3,6 +3,7 @@ import librosa
 import numpy as np
 import json
 import sys
+import os
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 import soundfile as sf
 
@@ -106,6 +107,12 @@ with open(transcription_path, "w") as f:
 # Save Word Timestamps for Further Analysis
 with open(timestamp_path, "w") as f:
     json.dump(word_timestamps, f, indent=4)
+    
+for file_path in temp_chunk_files:
+    try:
+        os.remove(file_path)
+    except OSError as e:
+        print(f"⚠️ Error deleting file {file_path}: {e}")
 
 # Print Final Output
 print("✅ Transcription saved to: ", transcription_path)
