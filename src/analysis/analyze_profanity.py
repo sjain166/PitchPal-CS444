@@ -57,15 +57,15 @@ with open(timestamp_data_path, "r") as f:
 filtered_results = []
 
 # Analyze each word from the transcription against predefined categories
-for word, time_data_list in timestamps.items():
-    word_lower = word.lower().strip()  # Normalize the word to lowercase and remove whitespace
+for entry in timestamps:
+    word = entry["word"]
+    word_lower = word.lower().strip()
+    start = entry["start_time"]
+    end = entry["end_time"]
 
-    # Check if the word is in the set of unprofessional words
     if any(re.search(pattern, word_lower) for pattern in UNPROFESSIONAL_PATTERNS):
         category = "unprofessional"
         confidence = 0.99
-
-    # Use AI models to check for profanity or offensive words
     else:
         result1 = profanity_pipe(word_lower)[0]
         result2 = offensive_pipe(word_lower)[0]
@@ -79,15 +79,13 @@ for word, time_data_list in timestamps.items():
         else:
             continue
 
-    # Store the results for each occurrence of the word along with its timestamps
-    for time_data in time_data_list:
-        filtered_results.append({
-            "word": word,
-            "category": category,
-            "start": time_data["start"],
-            "end": time_data["end"],
-            "confidence": confidence
-        })
+    filtered_results.append({
+        "word": word,
+        "category": category,
+        "start_time": start,
+        "end_time": end,
+        "confidence": confidence
+    })
 
 # Save the filtered analysis report to the specified JSON file
 with open(report_path, "w") as f:

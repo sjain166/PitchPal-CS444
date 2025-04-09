@@ -43,10 +43,12 @@ for sent in doc.sents:
         continue
 
     sent_words = [t.text.lower().strip(".,!?") for t in sent if t.is_alpha]
-    times = [t["start"] for word in sent_words if word in timestamps for t in timestamps[word]]
-    if times:
-        start_time = min(times)
-        end_time = max([t["end"] for word in sent_words if word in timestamps for t in timestamps[word]])
+    matched_times = [entry for entry in timestamps if entry["word"].lower() in sent_words]
+    matched_times.sort(key=lambda x: x["start_time"])
+
+    if matched_times:
+        start_time = matched_times[0]["start_time"]
+        end_time = matched_times[min(8, len(matched_times) - 1)]["end_time"]
     else:
         start_time = end_time = None
 
@@ -92,7 +94,7 @@ def match_profanity(start, end):
     for entry in profanity_data:
         if start is None or end is None:
             continue
-        if entry["start"] <= end and entry["end"] >= start:
+        if entry["start_time"] <= end and entry["end_time"] >= start:
             if entry["category"] == "offensive" or entry["category"] == "profanity":
                 matched.add("Profanity alert")
             elif entry["category"] == "unprofessional":
@@ -119,3 +121,5 @@ for i, sentence in enumerate(meaningful_sentences):
 os.makedirs(os.path.dirname(output_path), exist_ok=True)
 with open(output_path, "w") as f:
     json.dump(summary_output, f, indent=4)
+    
+print(f"✅ Profanity Report saved to: {output_path}")

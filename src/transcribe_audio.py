@@ -65,7 +65,7 @@ pipe = pipeline(
 
 # Transcribe Each Chunk and Store Results with Correct Timestamps
 transcribed_text = ""
-word_timestamps = {}  # Dictionary to store timestamps per word
+word_timestamps = []  # Dictionary to store timestamps per word
 temp_chunk_files = []  # List to keep track of temporary chunk files
 
 for i, (chunk, chunk_start_time) in enumerate(zip(chunks, chunk_start_times)):
@@ -87,12 +87,13 @@ for i, (chunk, chunk_start_time) in enumerate(zip(chunks, chunk_start_times)):
                 print(f"⚠️ Skipping word '{word}' due to missing timestamps.")
                 continue  # Skip this word
 
-            #  FIX: Correct timestamp adjustment using **chunk_start_time**
             adjusted_word_start = chunk_start_time + word_start
             adjusted_word_end = chunk_start_time + word_end
-
-            # word_timestamps[word] = {"start": round(adjusted_word_start, 2), "end": round(adjusted_word_end, 2)}
-            word_timestamps.setdefault(word, []).append({"start": adjusted_word_start, "end": adjusted_word_end})
+            word_timestamps.append({
+                "word": word,
+                "start_time": adjusted_word_start,
+                "end_time": adjusted_word_end
+            })
 
     else:
         print(f"⚠️ Warning: No timestamps found in chunk {i+1}")

@@ -9,6 +9,7 @@ parser.add_argument("timestamp_path", help="Path to timestamps JSON file")
 parser.add_argument("transcription_path", help="Path to transcription .txt file")
 parser.add_argument("--report_path", default="./tests/results/word_frequency_report.json", help="Path to save frequency report")
 args = parser.parse_args()
+
 transcription_path = args.transcription_path
 timestamp_path = args.timestamp_path
 report_path = args.report_path
@@ -18,31 +19,32 @@ os.makedirs(os.path.dirname(report_path), exist_ok=True)
 with open(timestamp_path, "r") as f:
     timestamps = json.load(f)
 
-# Track overused words with their timestamps
-overused_words = {}
-
 # Parameters for detecting overuse
 TIME_WINDOW = 10  # seconds
 FREQUENCY_THRESHOLD = 3  # word appears >= this in the time window
 
-for word, instances in timestamps.items():
-    word_lower = word.lower().strip()
-    if not re.match(r"^[a-zA-Z']+$", word_lower):
+# Build a map from word -> list of timestamp entries
+word_occurrences = defaultdict(list)
+for entry in timestamps:
+    word = entry["word"].lower().strip()
+    if re.match(r"^[a-zA-Z']+$", word):
+        word_occurrences[word].append(entry)
+        
+# Track overused words with their timestamps
+overused_words = {}
+
+for word, instances in word_occurrences.items():
+    if len(instances) < FREQUENCY_THRESHOLD:
         continue
 
-    # Get list of timestamps
-    time_stamps = sorted([t["start"] for t in instances])
-    if len(time_stamps) < FREQUENCY_THRESHOLD:
-        continue
-
-    # Slide a window across timestamps to check density
+    time_stamps = sorted([i["start_time"] for i in instances])
     for i in range(len(time_stamps) - FREQUENCY_THRESHOLD + 1):
-        window = time_stamps[i:i+FREQUENCY_THRESHOLD]
+        window = time_stamps[i:i + FREQUENCY_THRESHOLD]
         if window[-1] - window[0] <= TIME_WINDOW:
-            overused_words[word_lower] = {
+            overused_words[word] = {
                 "type": "content",
                 "count": len(instances),
-                "instances": instances
+                "instances": [{"start_time": inst["start_time"], "end_time": inst["end_time"]} for inst in instances]
             }
             break
 
