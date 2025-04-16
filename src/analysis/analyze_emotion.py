@@ -1,3 +1,7 @@
+# •	librosa to load audio,
+# •	torch for model inference,
+# •	transformers to load a pretrained emotion model,
+# •	softmax to convert raw scores into probabilities.
 import torch
 import librosa
 import json
@@ -6,32 +10,38 @@ import os
 from transformers import AutoModelForAudioClassification, AutoFeatureExtractor
 from scipy.special import softmax
 
-# Load args
+# •	audio_path → path to the .wav file.
+# •	timestamp_path → JSON file with word-level timestamps.
+# •	output_path → where the emotion results should be saved.
 parser = argparse.ArgumentParser(description="Analyze emotion from audio using timestamp ranges.")
 parser.add_argument("audio_path", help="Path to the input .wav file")
 parser.add_argument("timestamp_path", help="Path to the timestamps JSON file (sentence-level)")
 parser.add_argument("--output_path", default="./tests/results/emotion_analysis.json", help="Path to save results")
 args = parser.parse_args()
 
-# Load audio
+# Loads the audio file at a fixed 16kHz sample rate — required by the emotion model.
 audio, sr = librosa.load(args.audio_path, sr=16000)
 
-# Load timestamp ranges
+# Loads word-level timestamps (start/end time for each word spoken).
 with open(args.timestamp_path, "r") as f:
     timestamps = json.load(f)
 
-# Load model + feature extractor
+# • Loads the pre-trained emotion detection model and its corresponding feature extractor.
+# •	The model is from Hugging Face and trained on RAVDESS dataset.
+# •	Moved to GPU if available.
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model_name = "Wiam/wav2vec2-lg-xlsr-en-speech-emotion-recognition-finetuned-ravdess-v8"
 extractor = AutoFeatureExtractor.from_pretrained(model_name)
 model = AutoModelForAudioClassification.from_pretrained(model_name).to(device)
 model.eval()
 
-# Convert word-level timestamps into 10s chunks
+# Prepares to convert word-level timestamps into larger chunks (around 10 seconds long) for analysis.
 chunks = []
 curr_chunk = []
 start_time = 0.0
 
+# Groups words into ~10s chunks based on timing difference.
+# 	•	Each chunk represents a segment of continuous speech that will be fed into the emotion model.
 for word in timestamps:
     if not curr_chunk:
         start_time = word["start_time"]
@@ -49,35 +59,43 @@ if curr_chunk:
         "end_time": curr_chunk[-1]["end_time"]
     })
 
-# Predict emotion for each chunk
+# Iterates over each chunk and extracts that part of the audio using sample indices.
 results = []
 
 for segment in chunks:
     start = segment["start_time"]
     end = segment["end_time"]
-
     start_sample = int(start * sr)
     end_sample = int(end * sr)
     chunk = audio[start_sample:end_sample]
-
+    
+    # Skips tiny segments (likely too short to analyze meaningfully).
     if len(chunk) < 1000:
         continue
-
+    
+    # Processes audio through the model to get raw prediction scores (logits).
     inputs = extractor(chunk, sampling_rate=16000, return_tensors="pt", padding=True)
     with torch.no_grad():
         logits = model(**inputs.to(device)).logits
-
+        
+    # Converts logits to probabilities using softmax and extracts the top-predicted emotion and its confidence score.
     scores = softmax(logits.cpu().numpy()[0])
     top_idx = scores.argmax()
     label = model.config.id2label[top_idx]
     confidence = float(scores[top_idx])
 
-    # Skip low-confidence or positive emotions
+    # Skips segments that are either:
+	# •	Low confidence (< 51%)
+	# •	Positive/neutral emotions that don’t need feedback (like “happy” or “calm”).
     if confidence < 0.51 or label.lower() in ["calm", "neutral", "confident", "happy"]:
         continue
-
+    
+    # Assigns feedback strength based on confidence:
+	# •	recommended feedback if model is very sure
+	# •	possible feedback otherwise
     comment = "recommended feedback" if confidence >= 0.9 else "possible feedback"
-
+    
+    # Stores the final result for the chunk, including timestamps, emotion, and feedback strength.
     results.append({
         "start_time": round(start, 2),
         "end_time": round(end, 2),
@@ -86,7 +104,7 @@ for segment in chunks:
         "comment": comment
     })
 
-# Save results
+# Saves the results to a JSON file and prints a confirmation.
 os.makedirs(os.path.dirname(args.output_path), exist_ok=True)
 with open(args.output_path, "w") as f:
     json.dump(results, f, indent=2)

@@ -4,26 +4,28 @@ import argparse
 import re
 import os
 
-# Set up argument parser for command line inputs
+# Parse command-line arguments
 parser = argparse.ArgumentParser(description="Detect profanity and unprofessional language")
 parser.add_argument("timestamp_path", help="Path to timestamps JSON file")
 parser.add_argument("transcription_path", help="Path to transcription text file")
 parser.add_argument("--report_path", default="./tests/results/profanity_report.json", help="Output path for the report JSON")
 args = parser.parse_args()
 
-# Assign command line arguments to variables
+# Assign argument values to variables
 transcription_path = args.transcription_path
 timestamp_data_path = args.timestamp_path
 report_path = args.report_path
 
-# Create directory for report if it doesn't exist
+# Ensure output directory exists
 os.makedirs(os.path.dirname(report_path), exist_ok=True)
 
-# Load language analysis models for detecting profanity and offensive language
+# Load pre-trained Hugging Face text classification models
+# These models are used to detect offensive/profane language
 profanity_pipe = pipeline("text-classification", model="facebook/roberta-hate-speech-dynabench-r4-target")
 offensive_pipe = pipeline("text-classification", model="cardiffnlp/twitter-roberta-base-offensive")
 
-# Define a set of unprofessional words that are not profane but unsuitable for a pitch
+# Define regex patterns to catch informal, slang, or unprofessional expressions
+# These are not necessarily profane, but are discouraged in formal speech
 UNPROFESSIONAL_PATTERNS = [
     r"\bgonn?a\b",
     r"\bwann?a\b",
@@ -45,31 +47,34 @@ UNPROFESSIONAL_PATTERNS = [
     r"\bnigg(a|ah|as|az|er|ers|uh|urs)?\b"
 ]
 
-# Load the transcribed text from the specified file
+# Load full transcript (not used here, but included for completeness)
 with open(transcription_path, "r") as f:
     transcribed_text = f.read()
 
-# Load word-level timestamps from the specified JSON file
+# Load the timestamped words from JSON
 with open(timestamp_data_path, "r") as f:
     timestamps = json.load(f)
 
-# Initialize a list to hold filtered results of profanity and unprofessional speech
+# Initialize list to store flagged word results
 filtered_results = []
 
-# Analyze each word from the transcription against predefined categories
+# Loop through each word entry from the timestamps
 for entry in timestamps:
     word = entry["word"]
     word_lower = word.lower().strip()
     start = entry["start_time"]
     end = entry["end_time"]
-
+    
+    # First check for hardcoded unprofessional words using regex
     if any(re.search(pattern, word_lower) for pattern in UNPROFESSIONAL_PATTERNS):
         category = "unprofessional"
-        confidence = 0.99
+        confidence = 0.99 # high confidence since it's a direct match
     else:
+        # Run the word through the two language classification models
         result1 = profanity_pipe(word_lower)[0]
         result2 = offensive_pipe(word_lower)[0]
-
+        
+        # Check if the models detect profanity or offensive tone with high confidence
         if result1["label"] == "profanity" and result1["score"] > 0.6:
             category = "profanity"
             confidence = result1["score"]
@@ -77,8 +82,9 @@ for entry in timestamps:
             category = "offensive"
             confidence = result2["score"]
         else:
-            continue
-
+            continue # skip if not flagged by any model
+        
+    # Append the flagged word and its metadata to the results
     filtered_results.append({
         "word": word,
         "category": category,
@@ -87,9 +93,9 @@ for entry in timestamps:
         "confidence": confidence
     })
 
-# Save the filtered analysis report to the specified JSON file
+# Save the final list of flagged words to a JSON report
 with open(report_path, "w") as f:
     json.dump(filtered_results, f, indent=4)
 
-# Print summary of the analysis
+# Confirmation message
 print(f"✅ Profanity Report saved to: {report_path}")

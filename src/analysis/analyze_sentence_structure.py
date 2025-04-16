@@ -4,8 +4,11 @@ import os
 import json
 import argparse
 from sentence_transformers import SentenceTransformer, util
+
+# Load SpaCy English model for sentence tokenization and dependency parsing
 nlp = spacy.load("en_core_web_sm")
 
+# Sets up the script to receive the transcription text, timestamps, and profanity report.
 parser = argparse.ArgumentParser(description="Analyze sentence structure and relevance.")
 parser.add_argument("timestamp_path", help="Path to timestamps JSON file")
 parser.add_argument("transcription_path", help="Path to transcription .txt file")
@@ -13,9 +16,11 @@ parser.add_argument("profanity_report_path", help="Path to profanity report JSON
 output_path = "./tests/results/sentence_analysis_report.json"
 args = parser.parse_args()
 
+# These values define the cutoff for giving sentence-level feedback based on relevance.
 LOW_RELEVANCE_THRESHOLD = 0.15
 WEAK_RELEVANCE_THRESHOLD = 0.25
 
+# Load the transcription, word-level timestamps, and the profanity analysis report.
 with open(args.transcription_path, "r") as f:
     raw_text = f.read()
 
@@ -25,11 +30,13 @@ with open(args.timestamp_path, "r") as f:
 with open(args.profanity_report_path, "r") as f:
     profanity_data = json.load(f)
 
+# Cleans up disfluencies and spacing in the transcript to prepare for parsing.
 cleaned_text = re.sub(r"\[(UM|UH)\]", "", raw_text)
 cleaned_text = re.sub(r"\s+", " ", cleaned_text).strip()
 
-doc = nlp(cleaned_text)
+doc = nlp(cleaned_text) # Split into sentences using SpaCy
 
+# Load a pre-trained transformer to generate embeddings for each sentence.
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
 meaningful_sentences = []
@@ -37,24 +44,30 @@ sentence_time_ranges = []
 
 for sent in doc.sents:
     sent_text = sent.text.strip()
+    
+    # Check if sentence has both subject and verb
     has_subject = any(tok.dep_ in ("nsubj", "nsubjpass") for tok in sent)
     has_verb = any(tok.pos_ == "VERB" for tok in sent)
     if not (has_subject and has_verb):
-        continue
-
+        continue # Skip incomplete sentence fragments
+    
+    # Normalize words in sentence
     sent_words = [t.text.lower().strip(".,!?") for t in sent if t.is_alpha]
+    
+    # Find timestamps for these words
     matched_times = [entry for entry in timestamps if entry["word"].lower() in sent_words]
     matched_times.sort(key=lambda x: x["start_time"])
-
+    
+    # Set time range from first word to 9th word or last
     if matched_times:
         start_time = matched_times[0]["start_time"]
         end_time = matched_times[min(8, len(matched_times) - 1)]["end_time"]
     else:
         start_time = end_time = None
-
     meaningful_sentences.append(sent_text)
     sentence_time_ranges.append((start_time, end_time))
 
+# Compare user’s sentences to professionally phrased reference sentences using cosine similarity.
 embeddings = model.encode(meaningful_sentences)
 
 reference_sentences = [
@@ -76,11 +89,13 @@ reference_sentences = [
     "I'm excited about applying my skills to create impact"
 ]
 reference_embeddings = model.encode(reference_sentences)
+# Compute the highest similarity score for each user sentence.
 pitch_relevance = [
     max(util.cos_sim(e, ref).item() for ref in reference_embeddings)
     for e in embeddings
 ]
 
+# Classify each sentence as weak, borderline, or good based on its similarity score.
 def categorize_relevance(score):
     if score < LOW_RELEVANCE_THRESHOLD:
         return "Recommended feedback"
@@ -89,6 +104,7 @@ def categorize_relevance(score):
     else:
         return None
 
+# Identify profanity or slang words that appear during the sentence’s time span.
 def match_profanity(start, end):
     matched = set()
     for entry in profanity_data:
@@ -101,6 +117,7 @@ def match_profanity(start, end):
                 matched.add("Possible unprofessional tone")
     return list(matched)
 
+# For each sentence, combine grammar/semantic feedback with profanity flags and create a final comment.
 summary_output = []
 for i, sentence in enumerate(meaningful_sentences):
     rel_score = round(pitch_relevance[i], 2)
@@ -118,6 +135,7 @@ for i, sentence in enumerate(meaningful_sentences):
         "comment": combined_comment
     })
 
+# Save the analysis to disk in a structured JSON format.
 os.makedirs(os.path.dirname(output_path), exist_ok=True)
 with open(output_path, "w") as f:
     json.dump(summary_output, f, indent=4)
