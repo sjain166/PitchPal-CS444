@@ -71,6 +71,7 @@ for entry in timestamps:
         confidence = 0.99 # high confidence since it's a direct match
     else:
         # Run the word through the two language classification models
+        # Output: profanity_pipe("damn") -> [{'label': 'profanity', 'score': 0.892}]
         result1 = profanity_pipe(word_lower)[0]
         result2 = offensive_pipe(word_lower)[0]
         

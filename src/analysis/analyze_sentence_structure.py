@@ -1,5 +1,5 @@
 import re
-import spacy
+import spacy # spacy for sentence tokenization and grammar parsing
 import os
 import json
 import argparse
@@ -34,36 +34,41 @@ with open(args.profanity_report_path, "r") as f:
 cleaned_text = re.sub(r"\[(UM|UH)\]", "", raw_text)
 cleaned_text = re.sub(r"\s+", " ", cleaned_text).strip()
 
-doc = nlp(cleaned_text) # Split into sentences using SpaCy
+# Split into tokens using SpaCy
+doc = nlp(cleaned_text)
 
-# Load a pre-trained transformer to generate embeddings for each sentence.
+# Replace SpaCy's sentence segmentation with dynamic chunks of 10–15 words
+tokens = [token for token in doc if token.is_alpha or token.text in [".", "!", "?"]]
+chunk_size = 12
+step_size = 10
+
 model = SentenceTransformer('all-MiniLM-L6-v2')
-
 meaningful_sentences = []
 sentence_time_ranges = []
 
-for sent in doc.sents:
-    sent_text = sent.text.strip()
-    
-    # Check if sentence has both subject and verb
-    has_subject = any(tok.dep_ in ("nsubj", "nsubjpass") for tok in sent)
-    has_verb = any(tok.pos_ == "VERB" for tok in sent)
+for i in range(0, len(tokens), step_size):
+    chunk = tokens[i:i + chunk_size]
+    # This reconstructs the actual text from the selected chunk of tokens.
+    sent_text = " ".join([tok.text for tok in chunk]).strip()
+
+    # These checks use SpaCy’s parsed dependency tree and POS tags:
+	# •	nsubj, nsubjpass: subject or passive subject.
+	# •	VERB: verb in the sentence.
+    has_subject = any(tok.dep_ in ("nsubj", "nsubjpass") for tok in chunk)
+    has_verb = any(tok.pos_ == "VERB" for tok in chunk)
     if not (has_subject and has_verb):
-        continue # Skip incomplete sentence fragments
-    
-    # Normalize words in sentence
-    sent_words = [t.text.lower().strip(".,!?") for t in sent if t.is_alpha]
-    
-    # Find timestamps for these words
+        continue  # Skip if not meaningful
+
+    sent_words = [t.text.lower().strip(".,!?") for t in chunk if t.is_alpha]
     matched_times = [entry for entry in timestamps if entry["word"].lower() in sent_words]
     matched_times.sort(key=lambda x: x["start_time"])
-    
-    # Set time range from first word to 9th word or last
+
     if matched_times:
         start_time = matched_times[0]["start_time"]
         end_time = matched_times[min(8, len(matched_times) - 1)]["end_time"]
     else:
         start_time = end_time = None
+
     meaningful_sentences.append(sent_text)
     sentence_time_ranges.append((start_time, end_time))
 

@@ -47,7 +47,6 @@ for entry in word_entries:
     start = entry["start_time"]
     end = entry["end_time"]
     
-    print(f"🔍 Checking word: '{word}' from {start:.2f}s to {end:.2f}s")
     # Skip non-word tokens like pauses or symbols (e.g., “[noise]”).
     if not word.isalpha():
         continue
@@ -74,9 +73,7 @@ for entry in word_entries:
     # Compare expected word to predicted ASR result:
 	# •	If the expected word is missing from the ASR prediction, flag it as potentially mispronounced.
 	# •	Otherwise, print confirmation.
-    print(f"ASR output: '{transcription}'")
     if word not in transcription.split():
-        print("❌ Word not found in ASR output — possible mispronunciation.")
         report.append({
             "word": word,
             "start_time": start,
