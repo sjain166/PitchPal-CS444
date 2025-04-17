@@ -31,7 +31,7 @@ with open(args.timestamp_path, "r") as f:
 # •	Moved to GPU if available.
 # CUDA- Nvidia chip (not supported on Mac)
 device = "cuda" if torch.cuda.is_available() else "cpu" # can use 'mps' (Metal Performance Shaders) for Apple
-model_name = "Wiam/wav2vec2-lg-xlsr-en-speech-emotion-recognition-finetuned-ravdess-v8"
+model_name = "superb/hubert-large-superb-er"
 extractor = AutoFeatureExtractor.from_pretrained(model_name)
 model = AutoModelForAudioClassification.from_pretrained(model_name).to(device)
 # Use "model.train()" for training.
@@ -98,8 +98,8 @@ for segment in chunks:
 
     # Skips segments that are either:
 	# •	Low confidence (< 51%)
-	# •	Positive/neutral emotions that don’t need feedback (like “happy” or “calm”).
-    if confidence < 0.51 or label.lower() in ["calm", "neutral", "confident", "happy"]:
+	# •	Positive/neutral emotions that don’t need feedback (like “happy” or "neutral").
+    if confidence < 0.51 or label.lower() in ["neu", "hap"]:
         continue
     
     # Assigns feedback strength based on confidence:
