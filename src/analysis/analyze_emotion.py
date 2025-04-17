@@ -29,24 +29,26 @@ with open(args.timestamp_path, "r") as f:
 # • Loads the pre-trained emotion detection model and its corresponding feature extractor.
 # •	The model is from Hugging Face and trained on RAVDESS dataset.
 # •	Moved to GPU if available.
-device = "cuda" if torch.cuda.is_available() else "cpu"
+# CUDA- Nvidia chip (not supported on Mac)
+device = "cuda" if torch.cuda.is_available() else "cpu" # can use 'mps' (Metal Performance Shaders) for Apple
 model_name = "Wiam/wav2vec2-lg-xlsr-en-speech-emotion-recognition-finetuned-ravdess-v8"
 extractor = AutoFeatureExtractor.from_pretrained(model_name)
 model = AutoModelForAudioClassification.from_pretrained(model_name).to(device)
-model.eval()
+# Use "model.train()" for training.
+model.eval() # It tells PyTorch that you’re not training, you’re evaluating the model.
 
 # Prepares to convert word-level timestamps into larger chunks (around 10 seconds long) for analysis.
 chunks = []
 curr_chunk = []
 start_time = 0.0
 
-# Groups words into ~10s chunks based on timing difference.
-# 	•	Each chunk represents a segment of continuous speech that will be fed into the emotion model.
+# Groups words into ~5s chunks based on timing difference.
+# • Each chunk represents a segment of continuous speech that will be fed into the emotion model.
 for word in timestamps:
     if not curr_chunk:
         start_time = word["start_time"]
     curr_chunk.append(word)
-    if word["end_time"] - start_time >= 10.0:
+    if word["end_time"] - start_time >= 5.0:
         chunks.append({
             "start_time": start_time,
             "end_time": word["end_time"]
@@ -69,18 +71,28 @@ for segment in chunks:
     end_sample = int(end * sr)
     chunk = audio[start_sample:end_sample]
     
-    # Skips tiny segments (likely too short to analyze meaningfully).
-    if len(chunk) < 1000:
+    # Skips less than 5 seconds segments (likely too short to analyze meaningfully).
+    if len(chunk) < 5*16000: # 16000 sampling rate
         continue
     
     # Processes audio through the model to get raw prediction scores (logits).
+    # Returns a PyTorch-compatible tensor (return_tensors="pt").
     inputs = extractor(chunk, sampling_rate=16000, return_tensors="pt", padding=True)
     with torch.no_grad():
+        # Sends inputs to the appropriate device (CPU/GPU).
+        # **inputs unpacks the dictionary into keyword args
+        # •	The model outputs a logits tensor:
+        # •	These are raw scores (before softmax) for each emotion class.
         logits = model(**inputs.to(device)).logits
         
     # Converts logits to probabilities using softmax and extracts the top-predicted emotion and its confidence score.
+    # • logits.cpu() → moves it to CPU (safe for NumPy).
+	# •	numpy() → converts it into a NumPy array.
+    #  softmax(...) → converts raw logits into probabilities for each emotion class.
     scores = softmax(logits.cpu().numpy()[0])
+    # •	argmax() returns the index of the highest score (i.e., most confident emotion prediction).
     top_idx = scores.argmax()
+    # Uses the model’s built-in mapping of index → label.
     label = model.config.id2label[top_idx]
     confidence = float(scores[top_idx])
 
