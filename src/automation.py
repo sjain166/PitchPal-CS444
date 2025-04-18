@@ -29,7 +29,6 @@ def main():
     # Define paths
     timestamp_json = "./tests/timestamp.json"
     transcription_txt = "./tests/transcription.txt"
-    profanity_report_json = "./tests/results/profanity_report.json"
     analysis_folder = "./analysis"
     results_folder = "./tests/results"
     os.makedirs(results_folder, exist_ok=True)
@@ -38,6 +37,7 @@ def main():
     print("🧠 Running global analysis scripts...")
     analysis_scripts_once = [
         "analyze_profanity.py",
+        "analyze_filler.py",
         "analyze_volume.py",
         "analyze_speech_rate.py",
         "analyze_word_freq.py",
@@ -47,11 +47,9 @@ def main():
     ]
     for script in analysis_scripts_once:
         script_path = os.path.join(analysis_folder, script)
-        if script == "analyze_sentence_structure.py":
-            run_script(script_path, [timestamp_json, transcription_txt, profanity_report_json])
-        elif script == "analyze_volume.py":
+        if script == "analyze_volume.py":
             run_script(script_path, [audio_path])
-        elif script == "analyze_speech_rate.py":
+        elif script == "analyze_speech_rate.py" or script == "analyze_filler.py":
             run_script(script_path, [timestamp_json])
         elif script == "analyze_emotion.py" or script == "analyze_pronunciation.py":
             run_script(script_path, [audio_path, timestamp_json])
