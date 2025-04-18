@@ -1,148 +1,90 @@
 import re
-import spacy # spacy for sentence tokenization and grammar parsing
+import spacy
 import os
 import json
 import argparse
-from sentence_transformers import SentenceTransformer, util
+from transformers import pipeline
 
-# Load SpaCy English model for sentence tokenization and dependency parsing
+# Load SpaCy English model for sentence segmentation
 nlp = spacy.load("en_core_web_sm")
 
-# Sets up the script to receive the transcription text, timestamps, and profanity report.
+# Keep your original ArgumentParser exactly as-is
 parser = argparse.ArgumentParser(description="Analyze sentence structure and relevance.")
 parser.add_argument("timestamp_path", help="Path to timestamps JSON file")
 parser.add_argument("transcription_path", help="Path to transcription .txt file")
-parser.add_argument("profanity_report_path", help="Path to profanity report JSON file")
-output_path = "./tests/results/sentence_analysis_report.json"
+parser.add_argument("sentence_structure_path", help="Path to profanity report JSON file")  # unused here
 args = parser.parse_args()
 
-# These values define the cutoff for giving sentence-level feedback based on relevance.
-LOW_RELEVANCE_THRESHOLD = 0.15
-WEAK_RELEVANCE_THRESHOLD = 0.25
-
-# Load the transcription, word-level timestamps, and the profanity analysis report.
+# Load inputs
 with open(args.transcription_path, "r") as f:
-    raw_text = f.read()
+    raw_text = f.read().strip()
 
 with open(args.timestamp_path, "r") as f:
     timestamps = json.load(f)
 
-with open(args.profanity_report_path, "r") as f:
-    profanity_data = json.load(f)
+# Pre‑compile a little helper to strip punctuation for matching
+def clean_word(w):
+    return re.sub(r"[^\w']+", "", w.lower())
 
-# Cleans up disfluencies and spacing in the transcript to prepare for parsing.
-cleaned_text = re.sub(r"\[(UM|UH)\]", "", raw_text)
-cleaned_text = re.sub(r"\s+", " ", cleaned_text).strip()
+# Build a zero‑shot classifier once
+classifier = pipeline(
+    "zero-shot-classification",
+    model="facebook/bart-large-mnli",
+)
 
-# Split into tokens using SpaCy
-doc = nlp(cleaned_text)
+candidate_labels = ["relevant", "irrelevant"]
+hypothesis_template = "This sentence is {} for an elevator pitch."
 
-# Replace SpaCy's sentence segmentation with dynamic chunks of 10–15 words
-tokens = [token for token in doc if token.is_alpha or token.text in [".", "!", "?"]]
-chunk_size = 12
-step_size = 10
+IRRELEVANT_THRESHOLD = 0.5
 
-model = SentenceTransformer('all-MiniLM-L6-v2')
-meaningful_sentences = []
-sentence_time_ranges = []
+results = []
 
-for i in range(0, len(tokens), step_size):
-    chunk = tokens[i:i + chunk_size]
-    # This reconstructs the actual text from the selected chunk of tokens.
-    sent_text = " ".join([tok.text for tok in chunk]).strip()
+# 1) Sentence segmentation
+doc = nlp(raw_text)
+for sent in doc.sents:
+    sent_text = sent.text.strip()
+    if not sent_text:
+        continue
 
-    # These checks use SpaCy’s parsed dependency tree and POS tags:
-	# •	nsubj, nsubjpass: subject or passive subject.
-	# •	VERB: verb in the sentence.
-    has_subject = any(tok.dep_ in ("nsubj", "nsubjpass") for tok in chunk)
-    has_verb = any(tok.pos_ == "VERB" for tok in chunk)
-    if not (has_subject and has_verb):
-        continue  # Skip if not meaningful
-
-    sent_words = [t.text.lower().strip(".,!?") for t in chunk if t.is_alpha]
-    matched_times = [entry for entry in timestamps if entry["word"].lower() in sent_words]
-    matched_times.sort(key=lambda x: x["start_time"])
-
-    if matched_times:
-        start_time = matched_times[0]["start_time"]
-        end_time = matched_times[min(8, len(matched_times) - 1)]["end_time"]
+    # 2) Align timestamps
+    sent_tokens = [clean_word(tok.text) for tok in sent if tok.text.strip()]
+    matched = [
+        ts for ts in timestamps
+        if clean_word(ts["word"]) in sent_tokens
+    ]
+    matched = sorted(matched, key=lambda x: x["start_time"])
+    if matched:
+        start_time = matched[0]["start_time"]
+        end_time = matched[-1]["end_time"]
     else:
-        start_time = end_time = None
+        start_time = None
+        end_time = None
 
-    meaningful_sentences.append(sent_text)
-    sentence_time_ranges.append((start_time, end_time))
+    # 3) Zero‑shot classification
+    out = classifier(
+        sent_text,
+        candidate_labels=candidate_labels,
+        hypothesis_template=hypothesis_template,
+    )
+    # grab the “irrelevant” score
+    irrelevant_score = out["scores"][out["labels"].index("irrelevant")]
+    flagged = irrelevant_score > IRRELEVANT_THRESHOLD
 
-# Compare user’s sentences to professionally phrased reference sentences using cosine similarity.
-embeddings = model.encode(meaningful_sentences)
-
-reference_sentences = [
-    "I completed my degree in my field",
-    "I recently graduated with a background in a subject area",
-    "I'm currently working as a professional in my industry",
-    "My interests lie in applying my skills to real-world problems",
-    "I'm passionate about solving challenges in my domain",
-    "I transitioned from my studies to full-time work",
-    "I earned my degree with a focus on my area of interest",
-    "I have experience conducting research and projects",
-    "I'm pursuing further education in a specialized area",
-    "My background includes academic and practical experiences",
-    "I have worked on various interdisciplinary projects",
-    "I completed internships related to my career goals",
-    "I’ve led or participated in collaborative team efforts",
-    "I'm passionate about presenting information effectively",
-    "I’ve worked with diverse teams on real-world challenges",
-    "I'm excited about applying my skills to create impact"
-]
-reference_embeddings = model.encode(reference_sentences)
-# Compute the highest similarity score for each user sentence.
-pitch_relevance = [
-    max(util.cos_sim(e, ref).item() for ref in reference_embeddings)
-    for e in embeddings
-]
-
-# Classify each sentence as weak, borderline, or good based on its similarity score.
-def categorize_relevance(score):
-    if score < LOW_RELEVANCE_THRESHOLD:
-        return "Recommended feedback"
-    elif score < WEAK_RELEVANCE_THRESHOLD:
-        return "Might take a look at feedback"
-    else:
-        return None
-
-# Identify profanity or slang words that appear during the sentence’s time span.
-def match_profanity(start, end):
-    matched = set()
-    for entry in profanity_data:
-        if start is None or end is None:
-            continue
-        if entry["start_time"] <= end and entry["end_time"] >= start:
-            if entry["category"] == "offensive" or entry["category"] == "profanity":
-                matched.add("Profanity alert")
-            elif entry["category"] == "unprofessional":
-                matched.add("Possible unprofessional tone")
-    return list(matched)
-
-# For each sentence, combine grammar/semantic feedback with profanity flags and create a final comment.
-summary_output = []
-for i, sentence in enumerate(meaningful_sentences):
-    rel_score = round(pitch_relevance[i], 2)
-    base_comment = categorize_relevance(rel_score)
-    prof_comments = match_profanity(*sentence_time_ranges[i])
-    combined_comment = " | ".join(filter(None, [base_comment] + prof_comments)) or "Looks good!"
-
-    summary_output.append({
-        "sentence": sentence,
-        "timestamp": {
-            "start_time": sentence_time_ranges[i][0],
-            "end_time": sentence_time_ranges[i][1]
-        },
-        "relevance_score": rel_score,
-        "comment": combined_comment
+    # 4) Collect
+    results.append({
+        "sentence": sent_text,
+        "start_time": start_time,
+        "end_time": end_time,
+        "irrelevant_score": round(irrelevant_score, 2),
+        "flagged": flagged
     })
 
-# Save the analysis to disk in a structured JSON format.
-os.makedirs(os.path.dirname(output_path), exist_ok=True)
-with open(output_path, "w") as f:
-    json.dump(summary_output, f, indent=4)
-    
-print(f"✅ Profanity Report saved to: {output_path}")
+# 5) Write JSON
+dirpath = os.path.dirname(args.sentence_structure_path)
+if dirpath and not os.path.exists(dirpath):
+    os.makedirs(dirpath, exist_ok=True)
+
+with open(args.sentence_structure_path, "w") as f:
+    json.dump(results, f, indent=4)
+
+print(f"✅ Sentence‐structure analysis saved to: {args.sentence_structure_path}")

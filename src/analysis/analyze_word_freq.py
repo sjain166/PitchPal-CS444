@@ -53,7 +53,6 @@ for word, instances in word_occurrences.items():
             # If the time between first and last in window is small enough,
             # the word is considered overused
             overused_words[word] = {
-                "type": "content",
                 "count": len(instances),
                 "instances": [{"start_time": inst["start_time"], "end_time": inst["end_time"]} for inst in instances]
             }

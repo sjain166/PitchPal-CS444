@@ -99,8 +99,8 @@ for segment in chunks:
     # Skips segments that are either:
 	# •	Low confidence (< 51%)
 	# •	Positive/neutral emotions that don’t need feedback (like “happy” or "neutral").
-    if confidence < 0.51 or label.lower() in ["neu", "hap"]:
-        continue
+    # if confidence < 0.51 or label.lower() in ["neu", "hap"]:
+    #     continue
     
     # Assigns feedback strength based on confidence:
 	# •	recommended feedback if model is very sure

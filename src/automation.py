@@ -38,11 +38,11 @@ def main():
     print("🧠 Running global analysis scripts...")
     analysis_scripts_once = [
         "analyze_profanity.py",
-        "analyze_sentence_structure.py",
-        "analyze_word_freq.py",
         "analyze_volume.py",
         "analyze_speech_rate.py",
+        "analyze_word_freq.py",
         "analyze_emotion.py",
+        "analyze_sentence_structure.py",
         "analyze_pronunciation.py"
     ]
     for script in analysis_scripts_once:
