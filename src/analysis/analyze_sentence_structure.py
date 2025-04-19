@@ -13,6 +13,7 @@ args = parser.parse_args()
 # Load SpaCy and classifier
 nlp = spacy.load("en_core_web_sm")
 classifier = pipeline("zero-shot-classification", model="cross-encoder/nli-deberta-v3-base")
+grammar_corrector = pipeline("text2text-generation", model="pszemraj/flan-t5-large-grammar-synthesis")
 
 # ---- Load Transcription ----
 with open(args.transcription_path, "r") as f:
@@ -66,6 +67,14 @@ for sentence in sentences:
             "relevance": relevance,
             "feedback": "Off-topic statement"
         })
+    else:
+        corrected = grammar_corrector(sentence, max_new_tokens=100)[0]["generated_text"].strip()
+        if corrected != sentence.strip():
+            results.append({
+                "sentence": sentence,
+                "corrected": corrected,
+                "feedback": "Suggested grammatical improvements"
+            })
     
 # ---- Save to JSON ----
 with open(args.output_path, "w") as f:

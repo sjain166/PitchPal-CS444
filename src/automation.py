@@ -42,8 +42,7 @@ def main():
         "analyze_speech_rate.py",
         "analyze_word_freq.py",
         "analyze_emotion.py",
-        "analyze_sentence_structure.py",
-        "analyze_pronunciation.py"
+        "analyze_sentence_structure.py"
     ]
     for script in analysis_scripts_once:
         script_path = os.path.join(analysis_folder, script)
@@ -51,7 +50,7 @@ def main():
             run_script(script_path, [audio_path])
         elif script == "analyze_speech_rate.py" or script == "analyze_filler.py":
             run_script(script_path, [timestamp_json])
-        elif script == "analyze_emotion.py" or script == "analyze_pronunciation.py":
+        elif script == "analyze_emotion.py":
             run_script(script_path, [audio_path, timestamp_json])
         else:
             run_script(script_path, [timestamp_json, transcription_txt])

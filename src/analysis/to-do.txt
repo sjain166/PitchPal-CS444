@@ -1,5 +1,0 @@
-AUDIO
-1. Re-work on pronunciation.py file
-
-FACIAL
-1. Merge Facial Expression in emotion_analysis.json file.
