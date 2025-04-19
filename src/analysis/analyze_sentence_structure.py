@@ -1,90 +1,74 @@
-import re
-import spacy
-import os
-import json
+# Keep your original ArgumentParser exactly as-is
 import argparse
+import json
+import spacy
 from transformers import pipeline
 
-# Load SpaCy English model for sentence segmentation
-nlp = spacy.load("en_core_web_sm")
-
-# Keep your original ArgumentParser exactly as-is
 parser = argparse.ArgumentParser(description="Analyze sentence structure and relevance.")
 parser.add_argument("timestamp_path", help="Path to timestamps JSON file")
 parser.add_argument("transcription_path", help="Path to transcription .txt file")
-parser.add_argument("sentence_structure_path", help="Path to profanity report JSON file")  # unused here
+parser.add_argument("--output_path", default="./tests/results/sentence_structure_report.json", help="Path to profanity report JSON file")
 args = parser.parse_args()
 
-# Load inputs
+# Load SpaCy and classifier
+nlp = spacy.load("en_core_web_sm")
+classifier = pipeline("zero-shot-classification", model="cross-encoder/nli-deberta-v3-base")
+
+# ---- Load Transcription ----
 with open(args.transcription_path, "r") as f:
-    raw_text = f.read().strip()
+    transcription = f.read().strip()
 
-with open(args.timestamp_path, "r") as f:
-    timestamps = json.load(f)
+# ---- Break into Sentences ----
+doc = nlp(transcription)
+raw_sentences = [sent.text.strip() for sent in doc.sents if len(sent.text.strip()) > 0]
 
-# Pre‑compile a little helper to strip punctuation for matching
-def clean_word(w):
-    return re.sub(r"[^\w']+", "", w.lower())
+sentences = []
+buffer = ""
 
-# Build a zero‑shot classifier once
-classifier = pipeline(
-    "zero-shot-classification",
-    model="facebook/bart-large-mnli",
-)
+for sent in raw_sentences:
+    word_count = len(sent.split())
+    ends_with_punct = sent.endswith((".", "!", "?"))
 
-candidate_labels = ["relevant", "irrelevant"]
-hypothesis_template = "This sentence is {} for an elevator pitch."
-
-IRRELEVANT_THRESHOLD = 0.5
-
-results = []
-
-# 1) Sentence segmentation
-doc = nlp(raw_text)
-for sent in doc.sents:
-    sent_text = sent.text.strip()
-    if not sent_text:
-        continue
-
-    # 2) Align timestamps
-    sent_tokens = [clean_word(tok.text) for tok in sent if tok.text.strip()]
-    matched = [
-        ts for ts in timestamps
-        if clean_word(ts["word"]) in sent_tokens
-    ]
-    matched = sorted(matched, key=lambda x: x["start_time"])
-    if matched:
-        start_time = matched[0]["start_time"]
-        end_time = matched[-1]["end_time"]
+    if word_count < 7 and not ends_with_punct:
+        buffer += " " + sent
     else:
-        start_time = None
-        end_time = None
+        buffer += " " + sent
+        sentences.append(buffer.strip())
+        buffer = ""
 
-    # 3) Zero‑shot classification
-    out = classifier(
-        sent_text,
-        candidate_labels=candidate_labels,
-        hypothesis_template=hypothesis_template,
-    )
-    # grab the “irrelevant” score
-    irrelevant_score = out["scores"][out["labels"].index("irrelevant")]
-    flagged = irrelevant_score > IRRELEVANT_THRESHOLD
+if buffer.strip():
+    sentences.append(buffer.strip())
 
-    # 4) Collect
-    results.append({
-        "sentence": sent_text,
-        "start_time": start_time,
-        "end_time": end_time,
-        "irrelevant_score": round(irrelevant_score, 2),
-        "flagged": flagged
-    })
+# ---- Define Labels ----
+labels = [
+  "Speaker introduces themselves",
+  "Speaker mentions their education",
+  "Speaker describes technical experience",
+  "Speaker discusses future career goals or interests",
+  "Speaker highlights achievements or personal strengths",
+  "Speaker requests an opportunity like an internship",
+  "Speaker explains their motivation or values",
+  "Speaker makes an off-topic or confusing statement"
+]
 
-# 5) Write JSON
-dirpath = os.path.dirname(args.sentence_structure_path)
-if dirpath and not os.path.exists(dirpath):
-    os.makedirs(dirpath, exist_ok=True)
+# ---- Classify Each Sentence ----
+results = []
+for sentence in sentences:
+    out = classifier(sentence, labels)
+    label = out["labels"][0]
+    raw_score = out["scores"][0]
 
-with open(args.sentence_structure_path, "w") as f:
+    # Invert the confidence so that high means more relevant
+    relevance = round(1 - raw_score, 2)
+    if label == "Speaker makes an off-topic or confusing statement":
+        results.append({
+            "sentence": sentence,
+            "relevance": relevance,
+            "feedback": "Off-topic statement"
+        })
+    
+# ---- Save to JSON ----
+with open(args.output_path, "w") as f:
     json.dump(results, f, indent=4)
 
-print(f"✅ Sentence‐structure analysis saved to: {args.sentence_structure_path}")
+print(f"Saved report to {args.output_path}")
