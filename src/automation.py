@@ -24,12 +24,12 @@ def main():
 
     # Export as environment variable (optional) or pass as argument
     print("🚀 Starting transcription...")
-    subprocess.run(["python3", "transcribe_audio.py", audio_path])
+    subprocess.run(["python3", "preprocessing.py", audio_path])
     
     # Define paths
     timestamp_json = "./tests/timestamp.json"
     transcription_txt = "./tests/transcription.txt"
-    analysis_folder = "./analysis"
+    analysis_folder = "./audio_analysis"
     results_folder = "./tests/results"
     os.makedirs(results_folder, exist_ok=True)
     
