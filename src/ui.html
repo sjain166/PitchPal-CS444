@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emotion Audio Viewer</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    .slider-container {
+      position: relative;
+      width: 100%;
+      height: 40px;
+      background-color: #ffffff;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    .highlight {
+      position: absolute;
+      height: 100%;
+      background-color: rgba(255, 0, 0, 0.3);
+      z-index: 3;
+    }
+    .timestamp-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 5px;
+      font-size: 14px;
+      color: #555;
+    }
+    .progress-slider {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      appearance: none;
+      background: transparent;
+      z-index: 4;
+    }
+    .progress-slider::-webkit-slider-runnable-track {
+      height: 100%;
+      background: transparent;
+    }
+    .progress-slider::-moz-range-track {
+      height: 100%;
+      background: transparent;
+    }
+    .progress-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 10px;
+      height: 40px;
+      background: #333;
+      cursor: pointer;
+    }
+    .progress-slider::-moz-range-thumb {
+      width: 10px;
+      height: 40px;
+      background: #333;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>Emotion-Based Audio Analysis</h2>
+  <input type="file" id="audioInput" accept="audio/*" />
+  <br><br>
+  <audio id="audioPlayer" style="width: 100%;" controls></audio>
+  <div class="slider-container" id="sliderContainer">
+    <div id="highlightLayer"></div>
+    <input type="range" id="progressSlider" class="progress-slider" value="0" min="0" step="0.01">
+  </div>
+  <div class="timestamp-labels" id="timestampLabels"></div>
+
+  <script>
+    const audioInput = document.getElementById('audioInput');
+    const audioPlayer = document.getElementById('audioPlayer');
+    const sliderContainer = document.getElementById('sliderContainer');
+    const progressSlider = document.getElementById('progressSlider');
+    const timestampLabels = document.getElementById('timestampLabels');
+
+    const emotionData = [
+      {
+        "start_time": 0.0,
+        "end_time": 5.54,
+        "predicted_emotion": "sad",
+        "confidence": 0.49,
+        "comment": "possible feedback"
+      },
+      {
+        "start_time": 5.54,
+        "end_time": 10.88,
+        "predicted_emotion": "sad",
+        "confidence": 0.48,
+        "comment": "possible feedback"
+      }
+    ];
+
+    let audioDuration = 0;
+
+    audioInput.addEventListener('change', function(event) {
+      const file = event.target.files[0];
+      if (file) {
+        audioPlayer.src = URL.createObjectURL(file);
+        audioPlayer.load();
+
+        audioPlayer.onloadedmetadata = () => {
+          audioDuration = audioPlayer.duration;
+          progressSlider.max = audioDuration;
+          renderHighlights(audioDuration);
+          renderTimestamps(audioDuration);
+        };
+      }
+    });
+
+    // Sync audio with slider
+    audioPlayer.addEventListener('timeupdate', () => {
+      progressSlider.value = audioPlayer.currentTime;
+    });
+
+    progressSlider.addEventListener('input', () => {
+      audioPlayer.currentTime = progressSlider.value;
+    });
+
+    function renderHighlights(duration) {
+      const container = document.getElementById('highlightLayer');
+      container.innerHTML = '';
+      container.style.position = 'absolute';
+      container.style.top = 0;
+      container.style.left = 0;
+      container.style.width = '100%';
+      container.style.height = '100%';
+      container.style.zIndex = 2;
+
+      emotionData.forEach(({ start_time, end_time }) => {
+        const startPercent = (start_time / duration) * 100;
+        const widthPercent = ((end_time - start_time) / duration) * 100;
+        const highlight = document.createElement('div');
+        highlight.className = 'highlight';
+        highlight.style.left = `${startPercent}%`;
+        highlight.style.width = `${widthPercent}%`;
+        container.appendChild(highlight);
+      });
+    }
+
+    function renderTimestamps(duration) {
+      timestampLabels.innerHTML = '';
+      const numMarkers = 10;
+      for (let i = 0; i <= numMarkers; i++) {
+        const time = (i / numMarkers) * duration;
+        const label = document.createElement('span');
+        label.textContent = formatTime(time);
+        timestampLabels.appendChild(label);
+      }
+    }
+
+    function formatTime(seconds) {
+      const min = Math.floor(seconds / 60);
+      const sec = Math.floor(seconds % 60);
+      return `${min}:${sec.toString().padStart(2, '0')}`;
+    }
+  </script>
+</body>
+</html>
