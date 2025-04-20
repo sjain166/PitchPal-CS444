@@ -17,12 +17,19 @@
       margin-top: 10px;
       cursor: pointer;
     }
-    .highlight {
+    .highlight, .filler-highlight, .speed-highlight, .inappropriate-highlight,
+    .volume-highlight, .frequency-highlight {
       position: absolute;
       height: 100%;
-      background-color: rgba(255, 0, 0, 0.3);
       z-index: 3;
     }
+    .highlight { background-color: rgba(255, 0, 0, 0.3); }
+    .filler-highlight { background-color: rgba(0, 128, 255, 0.3); }
+    .speed-highlight { background-color: rgba(0, 255, 128, 0.3); }
+    .inappropriate-highlight { background-color: rgba(255, 165, 0, 0.4); }
+    .volume-highlight { background-color: rgba(128, 0, 255, 0.3); }
+    .frequency-highlight { background-color: rgba(255, 255, 0, 0.4); }
+
     .timestamp-labels {
       display: flex;
       justify-content: space-between;
@@ -40,14 +47,6 @@
       background: transparent;
       z-index: 4;
     }
-    .progress-slider::-webkit-slider-runnable-track {
-      height: 100%;
-      background: transparent;
-    }
-    .progress-slider::-moz-range-track {
-      height: 100%;
-      background: transparent;
-    }
     .progress-slider::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
@@ -62,6 +61,20 @@
       background: #333;
       cursor: pointer;
     }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      font-size: 18px;
+    }
+    .legend-color {
+      display: inline-block;
+      width: 20px;
+      height: 15px;
+      border: 1px solid #000;
+    }
   </style>
 </head>
 <body>
@@ -72,35 +85,99 @@
   <div class="slider-container" id="sliderContainer">
     <div id="highlightLayer"></div>
     <input type="range" id="progressSlider" class="progress-slider" value="0" min="0" step="0.01">
+    <div id="audioProgressBar" style="position: absolute; height: 5px; background: black; top: 0; left: 0; width: 0%; z-index: 5; pointer-events: none;"></div>
   </div>
   <div class="timestamp-labels" id="timestampLabels"></div>
+
+  <div style="display: flex;">
+    <div style="width: 200px;">
+      <strong>Legend:</strong><br>
+      <label class="legend-item">
+        <span><input type="checkbox" class="layer-toggle" data-layer="emotion" checked> emotion detection</span>
+        <span class="legend-color" style="background-color: rgba(255,0,0,0.3); border-color: red;"></span>
+      </label>
+
+      <label class="legend-item">
+        <span><input type="checkbox" class="layer-toggle" data-layer="filler" checked> filler words</span>
+        <span class="legend-color" style="background-color: rgba(0,128,255,0.3); border-color: blue;"></span>
+      </label>
+
+      <label class="legend-item">
+        <span><input type="checkbox" class="layer-toggle" data-layer="speed" checked> speaking speed</span>
+        <span class="legend-color" style="background-color: rgba(0,255,128,0.3); border-color: green;"></span>
+      </label>
+
+      <label class="legend-item">
+        <span><input type="checkbox" class="layer-toggle" data-layer="inappropriate" checked> inappropriate words</span>
+        <span class="legend-color" style="background-color: rgba(255,165,0,0.4); border-color: orange;"></span>
+      </label>
+
+      <label class="legend-item">
+        <span><input type="checkbox" class="layer-toggle" data-layer="volume" checked> volume check</span>
+        <span class="legend-color" style="background-color: rgba(128,0,255,0.3); border-color: purple;"></span>
+      </label>
+
+      <label class="legend-item">
+        <span><input type="checkbox" class="layer-toggle" data-layer="frequency" checked> overused words</span>
+        <span class="legend-color" style="background-color: rgba(255,255,0,0.4); border-color: #999933;"></span>
+      </label>
+    </div>
+    <div style="flex: 1; padding-left: 80px;">
+      <div id="emotionSummary" style="margin-top: 15px; font-size: 20px;"></div>
+      <div id="fillerSummary" style="margin-top: 15px; font-size: 20px;"></div>
+      <div id="speedSummary" style="margin-top: 15px; font-size: 20px;"></div>
+      <div id="inappropriateSummary" style="margin-top: 15px; font-size: 20px;"></div>
+      <div id="volumeSummary" style="margin-top: 15px; font-size: 20px;"></div>
+      <div id="frequencySummary" style="margin-top: 15px; font-size: 20px;"></div>
+    </div>
+  </div>
 
   <script>
     const audioInput = document.getElementById('audioInput');
     const audioPlayer = document.getElementById('audioPlayer');
     const sliderContainer = document.getElementById('sliderContainer');
     const progressSlider = document.getElementById('progressSlider');
+    const audioProgressBar = document.getElementById('audioProgressBar');
     const timestampLabels = document.getElementById('timestampLabels');
+    const checkboxes = document.querySelectorAll('.layer-toggle');
+
+    const layers = {
+      emotion: true,
+      filler: true,
+      speed: true,
+      inappropriate: true,
+      volume: true,
+      frequency: true,
+    };
 
     const emotionData = [
-      {
-        "start_time": 0.0,
-        "end_time": 5.54,
-        "predicted_emotion": "sad",
-        "confidence": 0.49,
-        "comment": "possible feedback"
-      },
-      {
-        "start_time": 5.54,
-        "end_time": 10.88,
-        "predicted_emotion": "sad",
-        "confidence": 0.48,
-        "comment": "possible feedback"
-      }
+      { start_time: 0.0, end_time: 2.5 },
+      { start_time: 5.0, end_time: 7.0 }
+    ];
+    const fillerData = [
+      { word: "[UH]", timestamps: [{ start_time: 1.0, end_time: 1.5 }] }
+    ];
+    const speedData = [
+      { start_time: 2.5, end_time: 3.5, wpm: 80, status: "fast" }
+    ];
+    const inappropriateData = [
+      { word: "gonna", category: "unprofessional", start_time: 4.0, end_time: 4.2, confidence: 0.95 }
+    ];
+    const volumeData = {
+      loud: [],
+      inaudible: [{ start_time: 6.0, end_time: 6.5 }]
+    };
+    const frequencyData = [
+      { word: "hi", count: 3, timestamps: [{ start_time: 3.0, end_time: 3.2 }, { start_time: 8.0, end_time: 8.3 }, { start_time: 10.0, end_time: 10.3 }] }
     ];
 
     let audioDuration = 0;
-
+    audioPlayer.addEventListener('timeupdate', () => {
+      const percent = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+      progressSlider.value = audioPlayer.currentTime;
+      audioProgressBar.style.width = `${percent}%`;
+    });
+    
     audioInput.addEventListener('change', function(event) {
       const file = event.target.files[0];
       if (file) {
@@ -112,38 +189,45 @@
           progressSlider.max = audioDuration;
           renderHighlights(audioDuration);
           renderTimestamps(audioDuration);
+          renderAllSummaries();
         };
       }
     });
 
-    // Sync audio with slider
-    audioPlayer.addEventListener('timeupdate', () => {
-      progressSlider.value = audioPlayer.currentTime;
-    });
-
-    progressSlider.addEventListener('input', () => {
-      audioPlayer.currentTime = progressSlider.value;
+    checkboxes.forEach(cb => {
+      cb.addEventListener('change', () => {
+        layers[cb.dataset.layer] = cb.checked;
+        renderHighlights(audioDuration);
+      });
     });
 
     function renderHighlights(duration) {
       const container = document.getElementById('highlightLayer');
       container.innerHTML = '';
-      container.style.position = 'absolute';
-      container.style.top = 0;
-      container.style.left = 0;
-      container.style.width = '100%';
-      container.style.height = '100%';
-      container.style.zIndex = 2;
 
-      emotionData.forEach(({ start_time, end_time }) => {
-        const startPercent = (start_time / duration) * 100;
-        const widthPercent = ((end_time - start_time) / duration) * 100;
-        const highlight = document.createElement('div');
-        highlight.className = 'highlight';
-        highlight.style.left = `${startPercent}%`;
-        highlight.style.width = `${widthPercent}%`;
-        container.appendChild(highlight);
-      });
+      const addHighlight = (start, end, className) => {
+        const div = document.createElement('div');
+        div.className = className;
+        div.style.left = `${(start / duration) * 100}%`;
+        div.style.width = `${((end - start) / duration) * 100}%`;
+        container.appendChild(div);
+      };
+
+      if (layers.emotion) emotionData.forEach(({ start_time, end_time }) => addHighlight(start_time, end_time, 'highlight'));
+      if (layers.filler) fillerData.forEach(({ timestamps }) => timestamps.forEach(({ start_time, end_time }) => addHighlight(start_time, end_time, 'filler-highlight')));
+      if (layers.speed) speedData.forEach(({ start_time, end_time }) => addHighlight(start_time, end_time, 'speed-highlight'));
+      if (layers.inappropriate) inappropriateData.forEach(({ start_time, end_time }) => addHighlight(start_time, end_time, 'inappropriate-highlight'));
+      if (layers.volume) volumeData.inaudible.forEach(({ start_time, end_time }) => addHighlight(start_time, end_time, 'volume-highlight'));
+      if (layers.frequency) frequencyData.forEach(({ timestamps }) => timestamps.forEach(({ start_time, end_time }) => addHighlight(start_time, end_time, 'frequency-highlight')));
+    }
+
+    function renderAllSummaries() {
+      renderEmotionSummary();
+      renderFillerSummary();
+      renderSpeedSummary();
+      renderInappropriateSummary();
+      renderVolumeSummary();
+      renderFrequencySummary();
     }
 
     function renderTimestamps(duration) {
@@ -155,6 +239,60 @@
         label.textContent = formatTime(time);
         timestampLabels.appendChild(label);
       }
+    }
+
+    function renderFrequencySummary() {
+        const container = document.getElementById('frequencySummary');
+        container.innerHTML = '<strong>Overused Words:</strong><br>';
+        frequencyData.forEach(({ word, count, timestamps }) => {
+            const times = timestamps.map(({ start_time, end_time }) => `${start_time.toFixed(2)}s to ${end_time.toFixed(2)}s`).join(', ');
+            container.innerHTML += `${word} spoken ${count} times at ${times}<br>`;
+        });
+    } 
+
+    function renderEmotionSummary() {
+      const container = document.getElementById('emotionSummary');
+      container.innerHTML = '<strong>Detected Emotions:</strong><br>';
+      emotionData.forEach(({ start_time, end_time, predicted_emotion }) => {
+        container.innerHTML += `from ${start_time.toFixed(2)}s to ${end_time.toFixed(2)}s → ${predicted_emotion}<br>`;
+      });
+    }
+
+    function renderFillerSummary() {
+      const container = document.getElementById('fillerSummary');
+      container.innerHTML = '<strong>Filler Words:</strong><br>';
+      fillerData.forEach(({ word, timestamps }) => {
+        timestamps.forEach(({ start_time, end_time }) => {
+          container.innerHTML += `from ${start_time.toFixed(2)}s to ${end_time.toFixed(2)}s → ${word}<br>`;
+        });
+      });
+    }
+
+    function renderSpeedSummary() {
+      const container = document.getElementById('speedSummary');
+      container.innerHTML = '<strong>Speaking Speed:</strong><br>';
+      speedData.forEach(({ start_time, end_time, status }) => {
+        container.innerHTML += `from ${start_time.toFixed(2)}s to ${end_time.toFixed(2)}s → ${status} speed<br>`;
+      });
+    }
+
+    function renderInappropriateSummary() {
+      const container = document.getElementById('inappropriateSummary');
+      container.innerHTML = '<strong>Inappropriate Words:</strong><br>';
+      inappropriateData.forEach(({ start_time, end_time, category }) => {
+        container.innerHTML += `from ${start_time.toFixed(2)}s to ${end_time.toFixed(2)}s → ${category} word spoken<br>`;
+      });
+    }
+
+    function renderVolumeSummary() {
+      const container = document.getElementById('volumeSummary');
+      container.innerHTML = '<strong>Volume Issues:</strong><br>';
+      volumeData.inaudible.forEach(({ start_time, end_time }) => {
+        container.innerHTML += `from ${start_time.toFixed(2)}s to ${end_time.toFixed(2)}s → inaudible sound<br>`;
+      });
+      volumeData.loud.forEach(({ start_time, end_time }) => {
+        container.innerHTML += `from ${start_time.toFixed(2)}s to ${end_time.toFixed(2)}s → loud sound<br>`;
+      });
     }
 
     function formatTime(seconds) {
