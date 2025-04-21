@@ -1,7 +1,6 @@
 import argparse
 import subprocess
 import os
-import glob
 import sys
 
 def run_script(script_path, args_list):
@@ -56,6 +55,34 @@ def main():
             run_script(script_path, [timestamp_json, transcription_txt])
 
     print("✅ All tasks completed successfully.")
+    
+    # Copy JSON results to public/analysis folder for UI
+    print("📂 Copying result files to UI folder...")
+    src_dir = os.path.join(results_folder)
+    dest_dir = "../app/public/analysis"
+    os.makedirs(dest_dir, exist_ok=True)
+    
+    # Clean previous JSON files in destination
+    for existing_file in os.listdir(dest_dir):
+        if existing_file.endswith(".json"):
+            os.remove(os.path.join(dest_dir, existing_file))
+    
+    for filename in os.listdir(src_dir):
+        if filename.endswith(".json"):
+            src_path = os.path.join(src_dir, filename)
+            dest_path = os.path.join(dest_dir, filename)
+            subprocess.run(["cp", src_path, dest_path])
+    print("✅ Copied analysis results to UI folder.")
+
+    # Copy audio file to UI folder
+    audio_dest_path = os.path.join(dest_dir, "audio.wav")
+    subprocess.run(["cp", audio_path, audio_dest_path])
+    print(f"✅ Copied audio to {audio_dest_path}")
+    
+    # Start the React app
+    print("🚀 Launching React frontend...")
+    os.chdir("../app")
+    subprocess.run(["npm", "start"])
 
 if __name__ == "__main__":
     main()

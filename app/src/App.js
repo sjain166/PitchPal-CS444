@@ -159,7 +159,7 @@ function App() {
         setInappropriateData(inappropriateJson);
         setVolumeData(volumeJson);
         setFrequencyData(frequencyJson);
-        
+
       } catch (err) {
         console.error('Failed to load analysis data:', err);
       }
@@ -197,7 +197,7 @@ function App() {
             renderTimestamps();
           }
         }}>
-          <source src="/analysis/under_over.wav" type="audio/wav" />
+          <source src="/analysis/audio.wav" type="audio/wav" />
           Your browser does not support the audio element.
         </audio>
         <div
