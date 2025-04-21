@@ -6,6 +6,7 @@ myenv/
 data/
 src/tests/
 src/tests_all
+app/public/analysis
 
 # Jupyter notebook checkpoints
 **/.ipynb_checkpoints

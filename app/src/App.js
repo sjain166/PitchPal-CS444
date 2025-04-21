@@ -4,7 +4,6 @@ import './App.css'; // For now, assume the styles are moved here
 function App() {
   const audioRef = useRef(null);
   const fileInputRef = useRef(null);
-  const progressSliderRef = useRef(null);
   const highlightLayerRef = useRef(null);
   const progressBarRef = useRef(null);
   const timestampLabelsRef = useRef(null);
@@ -20,12 +19,12 @@ function App() {
   });
 
   // Sample data
-  const [emotionData] = useState([{ start_time: 0.0, end_time: 2.5 }, { start_time: 5.0, end_time: 7.0 }]);
-  const [fillerData] = useState([{ word: "[UH]", timestamps: [{ start_time: 1.0, end_time: 1.5 }] }]);
-  const [speedData] = useState([{ start_time: 2.5, end_time: 3.5, wpm: 80, status: "fast" }]);
-  const [inappropriateData] = useState([{ word: "gonna", category: "unprofessional", start_time: 4.0, end_time: 4.2, confidence: 0.95 }]);
-  const [volumeData] = useState({ loud: [], inaudible: [{ start_time: 6.0, end_time: 6.5 }] });
-  const [frequencyData] = useState([{ word: "hi", count: 3, timestamps: [{ start_time: 3.0, end_time: 3.2 }, { start_time: 8.0, end_time: 8.3 }, { start_time: 10.0, end_time: 10.3 }] }]);
+  const [emotionData, setEmotionData] = useState([]);
+  const [fillerData, setFillerData] = useState([]);
+  const [speedData, setSpeedData] = useState([]);
+  const [inappropriateData, setInappropriateData] = useState([]);
+  const [volumeData, setVolumeData] = useState({ loud: [], inaudible: [] });
+  const [frequencyData, setFrequencyData] = useState([]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -130,6 +129,44 @@ function App() {
       container.appendChild(label);
     }
   };
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [
+          emotionRes,
+          fillerRes,
+          speedRes,
+          inappropriateRes,
+          volumeRes,
+          frequencyRes
+        ] = await Promise.all([
+          fetch('/analysis/emotion_analysis.json'),
+          fetch('/analysis/filler_report.json'),
+          fetch('/analysis/speech_rate_analysis.json'),
+          fetch('/analysis/profanity_report.json'),
+          fetch('/analysis/volume_report.json'),
+          fetch('/analysis/word_frequency_report.json')
+        ]);
+
+        const [emotionJson, fillerJson, speedJson, inappropriateJson, volumeJson, frequencyJson] = await Promise.all([
+          emotionRes.json(), fillerRes.json(), speedRes.json(), inappropriateRes.json(), volumeRes.json(), frequencyRes.json()
+        ]);
+
+        setEmotionData(emotionJson);
+        setFillerData(fillerJson);
+        setSpeedData(speedJson);
+        setInappropriateData(inappropriateJson);
+        setVolumeData(volumeJson);
+        setFrequencyData(frequencyJson);
+        
+      } catch (err) {
+        console.error('Failed to load analysis data:', err);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const toggleLayer = (layer) => {
     setLayers(prev => ({ ...prev, [layer]: !prev[layer] }));
@@ -151,10 +188,18 @@ function App() {
   return (
     <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
       <h2>Emotion-Based Audio Analysis</h2>
-      <input type="file" ref={fileInputRef} accept="audio/*" onChange={handleFileChange} />
-      <br /><br />
+      
       <div style={{ marginTop: '20px' }}>
-        <audio ref={audioRef} style={{ width: '100%', marginTop: '30px', marginBottom: '20px' }} controls />
+        <audio ref={audioRef} style={{ width: '100%', marginTop: '30px', marginBottom: '20px' }} controls onLoadedMetadata={() => {
+          if (audioRef.current) {
+            setAudioDuration(audioRef.current.duration);
+            renderHighlights();
+            renderTimestamps();
+          }
+        }}>
+          <source src="/analysis/under_over.wav" type="audio/wav" />
+          Your browser does not support the audio element.
+        </audio>
         <div
           className="slider-container"
           style={{
