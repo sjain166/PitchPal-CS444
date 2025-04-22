@@ -25,6 +25,7 @@ function App() {
   const [inappropriateData, setInappropriateData] = useState([]);
   const [volumeData, setVolumeData] = useState({ loud: [], inaudible: [] });
   const [frequencyData, setFrequencyData] = useState([]);
+  const [englishData, setEnglishData] = useState([]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -139,18 +140,20 @@ function App() {
           speedRes,
           inappropriateRes,
           volumeRes,
-          frequencyRes
+          frequencyRes,
+          englishRes
         ] = await Promise.all([
           fetch('/analysis/emotion_analysis.json'),
           fetch('/analysis/filler_report.json'),
           fetch('/analysis/speech_rate_analysis.json'),
           fetch('/analysis/profanity_report.json'),
           fetch('/analysis/volume_report.json'),
-          fetch('/analysis/word_frequency_report.json')
+          fetch('/analysis/word_frequency_report.json'),
+          fetch('/analysis/sentence_structure_report.json')
         ]);
 
-        const [emotionJson, fillerJson, speedJson, inappropriateJson, volumeJson, frequencyJson] = await Promise.all([
-          emotionRes.json(), fillerRes.json(), speedRes.json(), inappropriateRes.json(), volumeRes.json(), frequencyRes.json()
+        const [emotionJson, fillerJson, speedJson, inappropriateJson, volumeJson, frequencyJson, englishJson] = await Promise.all([
+          emotionRes.json(), fillerRes.json(), speedRes.json(), inappropriateRes.json(), volumeRes.json(), frequencyRes.json(), englishRes.json()
         ]);
 
         setEmotionData(emotionJson);
@@ -159,6 +162,7 @@ function App() {
         setInappropriateData(inappropriateJson);
         setVolumeData(volumeJson);
         setFrequencyData(frequencyJson);
+        setEnglishData(englishJson);
 
       } catch (err) {
         console.error('Failed to load analysis data:', err);
@@ -187,7 +191,7 @@ function App() {
 
   return (
     <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-      <h2>Emotion-Based Audio Analysis</h2>
+      <h1>PitchPal - Audio Analysis</h1>
       
       <div style={{ marginTop: '20px' }}>
         <audio ref={audioRef} style={{ width: '100%', marginTop: '30px', marginBottom: '20px' }} controls onLoadedMetadata={() => {
@@ -264,68 +268,107 @@ function App() {
             <>
               <div id="emotionSummary" style={{ marginTop: '15px', fontSize: '16px' }}>
                 <strong>Detected Emotions:</strong><br />
-                {emotionData.map(({ start_time, end_time }, idx) => (
-                  <div key={idx}>
-                    from {start_time.toFixed(2)}s to {end_time.toFixed(2)}s → emotion detected
-                  </div>
-                ))}
+                {emotionData.length === 0 ? (
+                  <div>No emotion data available.</div>
+                ) : (
+                  emotionData.map(({ start_time, end_time, predicted_emotion }, idx) => (
+                    <div key={idx}>
+                      from {start_time.toFixed(2)}s to {end_time.toFixed(2)}s → "{predicted_emotion}" detected
+                    </div>
+                  ))
+                )}
               </div>
               
               <div id="fillerSummary" style={{ marginTop: '15px', fontSize: '16px' }}>
                 <strong>Filler Words:</strong><br />
-                {fillerData.map(({ word, timestamps }, idx) => (
-                  <div key={idx}>
-                    {timestamps.map((t, i) => (
-                      <div key={i}>
-                        from {t.start_time.toFixed(2)}s to {t.end_time.toFixed(2)}s → {word}
-                      </div>
-                    ))}
-                  </div>
-                ))}
+                {fillerData.length === 0 ? (
+                  <div>No filler word data available.</div>
+                ) : (
+                  fillerData.map(({ word, timestamps }, idx) => (
+                    <div key={idx}>
+                      {timestamps.map((t, i) => (
+                        <div key={i}>
+                          from {t.start_time.toFixed(2)}s to {t.end_time.toFixed(2)}s → {word}
+                        </div>
+                      ))}
+                    </div>
+                  ))
+                )}
               </div>
               
               <div id="speedSummary" style={{ marginTop: '15px', fontSize: '16px' }}>
                 <strong>Speaking Speed:</strong><br />
-                {speedData.map(({ start_time, end_time, status }, idx) => (
-                  <div key={idx}>
-                    from {start_time.toFixed(2)}s to {end_time.toFixed(2)}s → {status} speed
-                  </div>
-                ))}
+                {speedData.length === 0 ? (
+                  <div>No speaking speed data available.</div>
+                ) : (
+                  speedData.map(({ start_time, end_time, status }, idx) => (
+                    <div key={idx}>
+                      from {start_time.toFixed(2)}s to {end_time.toFixed(2)}s → {status} speed
+                    </div>
+                  ))
+                )}
               </div>
               
               <div id="inappropriateSummary" style={{ marginTop: '15px', fontSize: '16px' }}>
                 <strong>Inappropriate Words:</strong><br />
-                {inappropriateData.map(({ start_time, end_time, category }, idx) => (
-                  <div key={idx}>
-                    from {start_time.toFixed(2)}s to {end_time.toFixed(2)}s → {category} word spoken
-                  </div>
-                ))}
+                {inappropriateData.length === 0 ? (
+                  <div>No inappropriate word data available.</div>
+                ) : (
+                  inappropriateData.map(({ start_time, end_time, category, word }, idx) => (
+                    <div key={idx}>
+                      from {start_time.toFixed(2)}s to {end_time.toFixed(2)}s → {category} word spoken: {word}
+                    </div>
+                  ))
+                )}
               </div>
               
               <div id="volumeSummary" style={{ marginTop: '15px', fontSize: '16px' }}>
                 <strong>Volume Issues:</strong><br />
-                {volumeData.inaudible.map(({ start_time, end_time }, idx) => (
-                  <div key={`inaudible-${idx}`}>
-                    from {start_time.toFixed(2)}s to {end_time.toFixed(2)}s → inaudible sound
-                  </div>
-                ))}
-                {volumeData.loud.map(({ start_time, end_time }, idx) => (
-                  <div key={`loud-${idx}`}>
-                    from {start_time.toFixed(2)}s to {end_time.toFixed(2)}s → loud sound
-                  </div>
-                ))}
+                {volumeData.inaudible.length === 0 && volumeData.loud.length === 0 ? (
+                  <div>No volume issues detected.</div>
+                ) : (
+                  <>
+                    {volumeData.inaudible.map(({ start_time, end_time }, idx) => (
+                      <div key={`inaudible-${idx}`}>
+                        from {start_time.toFixed(2)}s to {end_time.toFixed(2)}s → inaudible sound
+                      </div>
+                    ))}
+                    {volumeData.loud.map(({ start_time, end_time }, idx) => (
+                      <div key={`loud-${idx}`}>
+                        from {start_time.toFixed(2)}s to {end_time.toFixed(2)}s → loud sound
+                      </div>
+                    ))}
+                  </>
+                )}
               </div>
               
               <div id="frequencySummary" style={{ marginTop: '15px', fontSize: '16px' }}>
                 <strong>Overused Words:</strong><br />
-                {frequencyData.map(({ word, count, timestamps }, idx) => (
-                  <div key={idx}>
-                    {word} spoken {count} times at{' '}
-                    {timestamps.map(({ start_time, end_time }) =>
-                      `${start_time.toFixed(2)}s to ${end_time.toFixed(2)}s`
-                    ).join(', ')}
-                  </div>
-                ))}
+                {frequencyData.length === 0 ? (
+                  <div>No overused word data available.</div>
+                ) : (
+                  frequencyData.map(({ word, count, timestamps }, idx) => (
+                    <div key={idx}>
+                      {word} spoken {count} times at{' '}
+                      {timestamps.map(({ start_time, end_time }) =>
+                        `${start_time.toFixed(2)}s to ${end_time.toFixed(2)}s`
+                      ).join(', ')}
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div id="englishSummary" style={{ marginTop: '15px', fontSize: '16px' }}>
+                <strong>Irrelevant Sentences:</strong><br />
+                {englishData.length === 0 ? (
+                  <div>No irrelevant sentence used.</div>
+                ) : (
+                  <ul style={{ paddingLeft: '20px' }}>
+                    {englishData.map(({ sentence }, idx) => (
+                      <li key={idx}>{sentence}</li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </>
           )}
