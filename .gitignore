@@ -7,6 +7,9 @@ data/
 src/tests/
 src/tests_all
 
+# Model
+models/
+
 # Jupyter notebook checkpoints
 **/.ipynb_checkpoints
 
