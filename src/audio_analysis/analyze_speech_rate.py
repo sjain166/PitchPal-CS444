@@ -71,7 +71,7 @@ def main():
     segments = compute_speech_rate(words)
 
     # Output results to a JSON file
-    output_path = "./tests/results/speech_rate_analysis.json"
+    output_path = "src/tests/results/speech_rate_analysis.json"
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, 'w') as f:
         json.dump(segments, f, indent=2)

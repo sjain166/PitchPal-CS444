@@ -9,8 +9,8 @@ import soundfile as sf
 
 #  Define Audio Path
 audio_path = sys.argv[1]
-timestamp_path = "./tests/timestamp.json"
-transcription_path = "./tests/transcription.txt"
+timestamp_path = "src/tests/timestamp.json"
+transcription_path = "src/tests/transcription.txt"
 
 # Define the Hugging Face Model ID
 model_id = "nyrahealth/CrisperWhisper"
@@ -70,7 +70,7 @@ temp_chunk_files = []  # List to keep track of temporary chunk files
 
 for i, (chunk, chunk_start_time) in enumerate(zip(chunks, chunk_start_times)):
     print(f"🔄 Transcribing chunk {i+1}/{len(chunks)}...")
-    chunk_audio_path = f"./tests/temp_chunk_{i}.wav"
+    chunk_audio_path = f"src/tests/temp_chunk_{i}.wav"
     sf.write(chunk_audio_path, chunk, sr)  # Save temp chunk
     temp_chunk_files.append(chunk_audio_path)
     hf_pipeline_output = pipe(chunk_audio_path)  # Run transcription

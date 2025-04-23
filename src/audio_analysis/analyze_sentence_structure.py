@@ -7,7 +7,7 @@ from transformers import pipeline
 parser = argparse.ArgumentParser(description="Analyze sentence structure and relevance.")
 parser.add_argument("timestamp_path", help="Path to timestamps JSON file")
 parser.add_argument("transcription_path", help="Path to transcription .txt file")
-parser.add_argument("--output_path", default="./tests/results/sentence_structure_report.json", help="Path to profanity report JSON file")
+parser.add_argument("--output_path", default="src/tests/results/sentence_structure_report.json", help="Path to profanity report JSON file")
 args = parser.parse_args()
 
 # Load SpaCy and classifier

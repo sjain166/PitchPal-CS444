@@ -8,7 +8,7 @@ import os
 parser = argparse.ArgumentParser(description="Detect profanity and unprofessional language")
 parser.add_argument("timestamp_path", help="Path to timestamps JSON file")
 parser.add_argument("transcription_path", help="Path to transcription text file")
-parser.add_argument("--report_path", default="./tests/results/profanity_report.json", help="Output path for the report JSON")
+parser.add_argument("--report_path", default="src/tests/results/profanity_report.json", help="Output path for the report JSON")
 args = parser.parse_args()
 
 # Assign argument values to variables

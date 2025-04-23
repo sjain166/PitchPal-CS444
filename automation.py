@@ -23,13 +23,13 @@ def main():
 
     # Export as environment variable (optional) or pass as argument
     print("🚀 Starting transcription...")
-    subprocess.run(["python3", "preprocessing.py", audio_path])
+    subprocess.run(["python3", "src/preprocessing.py", audio_path])
     
     # Define paths
-    timestamp_json = "./tests/timestamp.json"
-    transcription_txt = "./tests/transcription.txt"
-    analysis_folder = "./audio_analysis"
-    results_folder = "./tests/results"
+    timestamp_json = "src/tests/timestamp.json"
+    transcription_txt = "src/tests/transcription.txt"
+    analysis_folder = "src/audio_analysis"
+    results_folder = "src/tests/results"
     os.makedirs(results_folder, exist_ok=True)
     
     # Run 3 analysis scripts once
@@ -59,7 +59,7 @@ def main():
     # Copy JSON results to public/analysis folder for UI
     print("📂 Copying result files to UI folder...")
     src_dir = os.path.join(results_folder)
-    dest_dir = "../app/public/analysis"
+    dest_dir = "app/public/analysis"
     os.makedirs(dest_dir, exist_ok=True)
     
     # Clean previous JSON files in destination
@@ -81,7 +81,7 @@ def main():
     
     # Start the React app
     print("🚀 Launching React frontend...")
-    os.chdir("../app")
+    os.chdir("app")
     subprocess.run(["npm", "start"])
 
 if __name__ == "__main__":

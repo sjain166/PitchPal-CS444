@@ -16,7 +16,7 @@ from scipy.special import softmax
 parser = argparse.ArgumentParser(description="Analyze emotion from audio using timestamp ranges.")
 parser.add_argument("audio_path", help="Path to the input .wav file")
 parser.add_argument("timestamp_path", help="Path to the timestamps JSON file (sentence-level)")
-parser.add_argument("--output_path", default="./tests/results/emotion_analysis.json", help="Path to save results")
+parser.add_argument("--output_path", default="src/tests/results/emotion_analysis.json", help="Path to save results")
 args = parser.parse_args()
 
 # Loads the audio file at a fixed 16kHz sample rate — required by the emotion model.

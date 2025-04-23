@@ -8,9 +8,7 @@ from collections import defaultdict
 parser = argparse.ArgumentParser(description="Analyze overused words from transcription.")
 parser.add_argument("timestamp_path", help="Path to timestamps JSON file")
 parser.add_argument("transcription_path", help="Path to transcription .txt file")
-# parser.add_argument("--timestamp_path", default="../tests/timestamp.json", help="Path to timestamps JSON file")
-# parser.add_argument("--transcription_path", default="../tests/transcription.txt", help="Path to transcription .txt file")
-parser.add_argument("--report_path", default="./tests/results/word_frequency_report.json", help="Path to save frequency report")
+parser.add_argument("--report_path", default="src/tests/results/word_frequency_report.json", help="Path to save frequency report")
 args = parser.parse_args()
 
 # Extract argument values

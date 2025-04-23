@@ -6,7 +6,7 @@ from collections import defaultdict
 # --- Command-line argument parsing ---
 parser = argparse.ArgumentParser(description="Detect filler words from transcription timestamps.")
 parser.add_argument("timestamp_path", help="Path to timestamps JSON file")
-parser.add_argument("--report_path", default="./tests/results/filler_report.json", help="Output path for the filler report JSON")
+parser.add_argument("--report_path", default="src/tests/results/filler_report.json", help="Output path for the filler report JSON")
 args = parser.parse_args()
 
 timestamp_path = args.timestamp_path

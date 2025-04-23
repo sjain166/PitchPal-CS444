@@ -10,8 +10,8 @@ import argparse
 # --- CLI argument parsing ---
 parser = argparse.ArgumentParser(description="Volume interval analysis using RMS energy")
 parser.add_argument("audio_path", help="Path to the input .wav audio file")
-parser.add_argument("--json_output_path", default="./tests/results/volume_report.json", help="Path to store the JSON result file")
-parser.add_argument("--plot_output_path", default="./tests/results/volume_plot.png", help="Path to store the volume plot image (PNG)")
+parser.add_argument("--json_output_path", default="src/tests/results/volume_report.json", help="Path to store the JSON result file")
+parser.add_argument("--plot_output_path", default="src/tests/results/volume_plot.png", help="Path to store the volume plot image (PNG)")
 args = parser.parse_args()
 
 # --- Load audio file ---
