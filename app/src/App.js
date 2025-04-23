@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import './App.css'; // For now, assume the styles are moved here
+import './App.css';
 
 function App() {
   const audioRef = useRef(null);
-  const fileInputRef = useRef(null);
   const highlightLayerRef = useRef(null);
   const progressBarRef = useRef(null);
   const timestampLabelsRef = useRef(null);
@@ -18,7 +17,6 @@ function App() {
     frequency: false
   });
 
-  // Sample data
   const [emotionData, setEmotionData] = useState([]);
   const [fillerData, setFillerData] = useState([]);
   const [speedData, setSpeedData] = useState([]);
@@ -39,20 +37,6 @@ function App() {
     audio.addEventListener('timeupdate', updateProgress);
     return () => audio.removeEventListener('timeupdate', updateProgress);
   }, []);
-
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file && audioRef.current) {
-      audioRef.current.src = URL.createObjectURL(file);
-      audioRef.current.load();
-
-      audioRef.current.onloadedmetadata = () => {
-        setAudioDuration(audioRef.current?.duration || 0);
-        renderHighlights();
-        renderTimestamps();
-      };
-    }
-  };
 
   const renderHighlights = () => {
     const container = highlightLayerRef.current;
