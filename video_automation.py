@@ -9,9 +9,9 @@ def run_inference(script_path, args):
 def main():
     parser = argparse.ArgumentParser(description="Run all CV inferences on a video")
     parser.add_argument("--video", required=True, help="Path to input video")
-    parser.add_argument("--nervous-model", required=True, help="Path to nervous model .pth")
-    parser.add_argument("--eye-model", required=True, help="Path to eye contact model .pkl")
-    parser.add_argument("--output-dir", required=True, help="Directory to save output JSON files")
+    parser.add_argument("--nervous-model", required=False, help="Path to nervous model .pth")
+    parser.add_argument("--eye-model", required=False, help="Path to eye contact model .pkl")
+    parser.add_argument("--output-dir", required=False, help="Directory to save output JSON files", default="output")
 
     args = parser.parse_args()
 
@@ -20,27 +20,25 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Paths to utils
-    base = Path(__file__).resolve().parents[1] / "utils"
+    base = Path(__file__).resolve().parents[0] / "src" / "video_analysis"
     nervous_script = base / "infer_nervous.py"
     eye_script = base / "infer_eye.py"
     motion_script = base / "infer_background.py"
 
     # Run each module
-    run_inference(nervous_script, [
-        "--input-video", str(video_path),
-        "--model-path", str(args.nervous_model),
-        "--output-json", str(output_dir / "nervous_timeline.json")
-    ])
+    # print("Nervousness analysis...")
+    # run_inference(nervous_script, [
+    #     "--input-video", str(video_path)
+    # ])
 
+    print("Eye contact analysis...")
     run_inference(eye_script, [
-        "--video", str(video_path),
-        "--model", str(args.eye_model),
-        "--output-json", str(output_dir / "eye_contact_timeline.json")
+        "--video", str(video_path)
     ])
 
+    print("Motion analysis...")
     run_inference(motion_script, [
-        "--input-video", str(video_path),
-        "--output-json", str(output_dir / "motion_timeline.json")
+        "--input-video", str(video_path)
     ])
 
     print(f"[✓] All analysis completed. Results saved to: {output_dir}")

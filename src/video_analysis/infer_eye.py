@@ -70,8 +70,8 @@ def main():
     """
     parser = argparse.ArgumentParser(description="Infer Eye Contact Events")
     parser.add_argument("--video", required=True, help="Path to input video")
-    parser.add_argument("--model", required=True, help="Path to .pkl weights", default="models/eye-contact-cnn/data/model_weights.pkl")
-    parser.add_argument("--output-json", required=True, help="Path to save output JSON" , default="output/eye_discontact_timeline.json")
+    parser.add_argument("--model", required=False, help="Path to .pkl weights", default="models/eye-contact-cnn/data/model_weights.pkl")
+    parser.add_argument("--output-json", required=False, help="Path to save output JSON" , default="output/eye_discontact_timeline.json")
     parser.add_argument("--threshold", type=float, default=0.5, help="Score below which we consider no eye contact")
     args = parser.parse_args()
 
