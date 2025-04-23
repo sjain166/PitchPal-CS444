@@ -72,10 +72,10 @@ def main():
     """
     parser = argparse.ArgumentParser(description="Infer nervousness events in video")
     parser.add_argument('--input-video', required=True, help='Path to input MP4')
-    parser.add_argument('--model-path', required=True, help='Path to trained .pth model')
+    parser.add_argument('--model-path', required=True, help='Path to trained .pth model', default='models/nervous_classifier/best_model.pth')
     parser.add_argument('--threshold', type=float, default=0.55, help='Probability threshold')
     parser.add_argument('--device', default='auto', choices=['auto', 'cpu', 'cuda', 'mps'], help='Device')
-    parser.add_argument('--output-json', required=True, help='Where to save JSON output')
+    parser.add_argument('--output-json', required=True, help='Where to save JSON output', default="output/nervous_timeline.json")
     args = parser.parse_args()
 
     device = get_device(args.device)

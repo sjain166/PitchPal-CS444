@@ -17,8 +17,17 @@ from model import model_static
 # Constants
 CNN_FACE_MODEL = "models/eye-contact-cnn/data/mmod_human_face_detector.dat"
 
-def get_device():
-    return torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+
+
+def get_device(preferred):
+    if preferred == 'auto':
+        if torch.backends.mps.is_available():
+            return torch.device('mps')
+        elif torch.cuda.is_available():
+            return torch.device('cuda')
+        else:
+            return torch.device('cpu')
+    return torch.device(preferred)
 
 def load_model(model_path, device):
     model = model_static()
@@ -61,12 +70,12 @@ def main():
     """
     parser = argparse.ArgumentParser(description="Infer Eye Contact Events")
     parser.add_argument("--video", required=True, help="Path to input video")
-    parser.add_argument("--model", required=True, help="Path to .pkl weights")
-    parser.add_argument("--output-json", required=True, help="Path to save output JSON")
+    parser.add_argument("--model", required=True, help="Path to .pkl weights", default="models/eye-contact-cnn/data/model_weights.pkl")
+    parser.add_argument("--output-json", required=True, help="Path to save output JSON" , default="output/eye_discontact_timeline.json")
     parser.add_argument("--threshold", type=float, default=0.5, help="Score below which we consider no eye contact")
     args = parser.parse_args()
 
-    device = get_device()
+    device = get_device("auto")
     model = load_model(args.model, device)
 
     detector = dlib.cnn_face_detection_model_v1(CNN_FACE_MODEL)

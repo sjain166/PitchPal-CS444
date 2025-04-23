@@ -29,16 +29,25 @@ def load_detector():
     model.eval()
     return model
 
+def get_device(preferred):
+    if preferred == 'auto':
+        if torch.backends.mps.is_available():
+            return torch.device('mps')
+        elif torch.cuda.is_available():
+            return torch.device('cuda')
+        else:
+            return torch.device('cpu')
+    return torch.device(preferred)
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--input-video', required=True)
-    parser.add_argument('--output-json', required=True)
+    parser.add_argument('--output-json', required=True, default="output/background_noise.json")
     parser.add_argument('--threshold', type=int, default=1, help='Max objects/persons before flagging')
     parser.add_argument('--window-sec', type=int, default=2)
     args = parser.parse_args()
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = get_device('auto')
     model = load_detector().to(device)
 
     cap = cv2.VideoCapture(args.input_video)
@@ -194,3 +203,5 @@ if __name__ == '__main__':
 
 # if __name__ == '__main__':
 #     main()
+
+
