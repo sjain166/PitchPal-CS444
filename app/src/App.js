@@ -359,14 +359,32 @@ function App() {
               </div>
 
               <div id="englishSummary" style={{ marginTop: '15px', fontSize: '16px' }}>
+                <strong>Possible Grammatical Mistakes:</strong><br />
+                {englishData.filter(item => item.corrected).length === 0 ? (
+                  <div>No grammatical errors.</div>
+                ) : (
+                  <ul style={{ paddingLeft: '20px' }}>
+                    {englishData
+                      .filter(item => item.corrected)
+                      .map(({ sentence, corrected }, idx) => (
+                        <li key={`grammar-${idx}`}>
+                          <strong>Original:</strong> {sentence}<br />
+                          <strong>Suggested:</strong> {corrected}
+                        </li>
+                      ))}
+                  </ul>
+                )}
+                <br />
                 <strong>Irrelevant Sentences:</strong><br />
-                {englishData.length === 0 ? (
+                {englishData.filter(item => !item.corrected).length === 0 ? (
                   <div>No irrelevant sentence used.</div>
                 ) : (
                   <ul style={{ paddingLeft: '20px' }}>
-                    {englishData.map(({ sentence }, idx) => (
-                      <li key={idx}>{sentence}</li>
-                    ))}
+                    {englishData
+                      .filter(item => !item.corrected)
+                      .map(({ sentence }, idx) => (
+                        <li key={`irrelevant-${idx}`}>{sentence}</li>
+                      ))}
                   </ul>
                 )}
               </div>
