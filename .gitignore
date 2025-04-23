@@ -8,6 +8,9 @@ src/tests/
 src/tests_all
 app/public/analysis
 
+# Model
+models/
+
 # Jupyter notebook checkpoints
 **/.ipynb_checkpoints
 
