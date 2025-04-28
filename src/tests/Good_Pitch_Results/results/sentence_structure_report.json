@@ -1,0 +1,22 @@
+[
+    {
+        "sentence": "Good afternoon, I'm Logan Mayhew.",
+        "corrected": "Good afternoon, I'm Logan Mayfield.",
+        "feedback": "Suggested grammatical improvements"
+    },
+    {
+        "sentence": "In my second year, I already have experience using SPSS, and I've started on my senior capstone project, so I'm familiar with the research process.",
+        "corrected": "In my second year, I already have experience using SPSS, and I've started on my senior project, so I'm familiar with the research process.",
+        "feedback": "Suggested grammatical improvements"
+    },
+    {
+        "sentence": "I work well on teams and in positions of leadership, serving on the executive boards for Equine Club, Psy Club, and Alpha Z Delta, and I've also demonstrated sound communication skills through my role as a As a resident assistant i'm very excited about your company because you conduct research on a multitude of sources and i have a wide variety of interests within psychology that i would like to explore from juvenile justice through equity within education.",
+        "corrected": "I work well on teams and in positions of leadership, including serving on the executive committees of the Equine Club, Psy Club, and Alpha Zeta Club, and I've also demonstrated sound communication skills through my role as a resident assistant. As a senior assistant, I'm very excited about your company because you conduct research on a variety of subjects and I have a wide variety of interests within psychology that I would like to explore from juvenile justice through equity",
+        "feedback": "Suggested grammatical improvements"
+    },
+    {
+        "sentence": "So what might the next steps be to obtaining an interview?",
+        "corrected": "So what might the next steps be to obtain an interview?",
+        "feedback": "Suggested grammatical improvements"
+    }
+]

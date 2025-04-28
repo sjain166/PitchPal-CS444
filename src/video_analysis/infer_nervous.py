@@ -75,7 +75,7 @@ def main():
     parser.add_argument('--model-path', required=False, help='Path to trained .pth model', default='models/nervous_classifier/best_model.pth')
     parser.add_argument('--threshold', type=float, default=0.55, help='Probability threshold')
     parser.add_argument('--device', default='auto', choices=['auto', 'cpu', 'cuda', 'mps'], help='Device')
-    parser.add_argument('--output-json', required=False, help='Where to save JSON output', default="output/nervous_timeline.json")
+    parser.add_argument('--output-json', required=False, help='Where to save JSON output', default="src/tests/results/nervous_timeline.json")
     args = parser.parse_args()
 
     device = get_device(args.device)

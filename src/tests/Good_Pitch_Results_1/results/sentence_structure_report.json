@@ -1,0 +1,27 @@
+[
+    {
+        "sentence": "I am a member of the American Marketing Association and Alpha Kappa Psi, both of which are dedicated to shaping future business leaders.",
+        "corrected": "I am a member of the American Marketing Association and Alpha Kappa Pi, both of which are dedicated to shaping future business leaders.",
+        "feedback": "Suggested grammatical improvements"
+    },
+    {
+        "sentence": "I hope to incorporate my business knowledge into consumer trend analysis and strengthening relationships among consumers as well as other companies.",
+        "corrected": "I hope to incorporate my business knowledge into consumer research and to strengthen relationships among consumers and companies.",
+        "feedback": "Suggested grammatical improvements"
+    },
+    {
+        "sentence": "I am savvy, social and principled and have exquisite interpersonal communication skills.",
+        "corrected": "I am savvy, social and principled and have excellent interpersonal communication skills.",
+        "feedback": "Suggested grammatical improvements"
+    },
+    {
+        "sentence": "I know that I can be an asset in any company and or situation, and I hope that you will consider me for an internship or job opportunity.",
+        "corrected": "I know that I can be an asset in any company or situation, and I hope that you will consider me for an internship or job opportunity.",
+        "feedback": "Suggested grammatical improvements"
+    },
+    {
+        "sentence": "Thank you so much.",
+        "corrected": "Thank you so much!..",
+        "feedback": "Suggested grammatical improvements"
+    }
+]

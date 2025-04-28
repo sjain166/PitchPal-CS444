@@ -1,0 +1,32 @@
+[
+    {
+        "sentence": "[UM] I'm in a bunch of clubs on campus.",
+        "relevance": 0.69,
+        "feedback": "Off-topic statement"
+    },
+    {
+        "sentence": "I got a B in honors English, which is actually pretty great for that class.",
+        "corrected": "I got a B in English honors, which is actually pretty great for that class.",
+        "feedback": "Suggested grammatical improvements"
+    },
+    {
+        "sentence": "I don't really know what you're looking for, but.",
+        "relevance": 0.05,
+        "feedback": "Off-topic statement"
+    },
+    {
+        "sentence": "[UM] good writing is always a plus.",
+        "corrected": "UM Good writing is always a plus.",
+        "feedback": "Suggested grammatical improvements"
+    },
+    {
+        "sentence": "So [UM] that's about it.",
+        "corrected": "So _um_ that's about it.",
+        "feedback": "Suggested grammatical improvements"
+    },
+    {
+        "sentence": "Thanks.",
+        "corrected": "Thanks!.. . . Thanks.",
+        "feedback": "Suggested grammatical improvements"
+    }
+]

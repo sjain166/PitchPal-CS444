@@ -1,0 +1,20 @@
+[
+  {
+    "start_time": 10.58,
+    "end_time": 15.68,
+    "wpm": 200.0,
+    "status": "fast"
+  },
+  {
+    "start_time": 36.16,
+    "end_time": 41.46,
+    "wpm": 215.09,
+    "status": "fast"
+  },
+  {
+    "start_time": 41.46,
+    "end_time": 46.0,
+    "wpm": 185.02,
+    "status": "fast"
+  }
+]

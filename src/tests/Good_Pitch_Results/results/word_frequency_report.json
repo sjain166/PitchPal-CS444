@@ -1,0 +1,38 @@
+[
+    {
+        "word": "i'm",
+        "count": 3,
+        "timestamps": [
+            {
+                "start_time": 1.54,
+                "end_time": 1.78
+            },
+            {
+                "start_time": 2.58,
+                "end_time": 3.0
+            },
+            {
+                "start_time": 7.82,
+                "end_time": 7.94
+            }
+        ]
+    },
+    {
+        "word": "on",
+        "count": 3,
+        "timestamps": [
+            {
+                "start_time": 13.84,
+                "end_time": 13.96
+            },
+            {
+                "start_time": 18.3,
+                "end_time": 18.48
+            },
+            {
+                "start_time": 21.2,
+                "end_time": 21.38
+            }
+        ]
+    }
+]

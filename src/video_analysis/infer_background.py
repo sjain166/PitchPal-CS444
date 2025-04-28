@@ -42,7 +42,7 @@ def get_device(preferred):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--input-video', required=True)
-    parser.add_argument('--output-json', required=False, default="output/background_noise.json")
+    parser.add_argument('--output-json', required=False, default="src/tests/results/background_noise.json")
     parser.add_argument('--threshold', type=int, default=1, help='Max objects/persons before flagging')
     parser.add_argument('--window-sec', type=int, default=2)
     args = parser.parse_args()

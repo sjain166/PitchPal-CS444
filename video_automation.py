@@ -26,10 +26,11 @@ def main():
     motion_script = base / "infer_background.py"
 
     # Run each module
-    # print("Nervousness analysis...")
-    # run_inference(nervous_script, [
-    #     "--input-video", str(video_path)
-    # ])
+    
+    print("Nervousness analysis...")
+    run_inference(nervous_script, [
+        "--input-video", str(video_path)
+    ])
 
     print("Eye contact analysis...")
     run_inference(eye_script, [

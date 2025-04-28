@@ -1,88 +1,67 @@
+#!/usr/bin/env python3
 import argparse
 import subprocess
-import os
 import sys
+from pathlib import Path
 
-def run_script(script_path, args_list):
-    result = subprocess.run(["python3", script_path] + args_list)
-    if result.returncode != 0:
-        print(f"❌ Error running {script_path}")
-        sys.exit(1)
-        
-def main():
-    parser = argparse.ArgumentParser(description="Run CrisperWhisper transcription on an audio file.")
-    parser.add_argument("audio_path", help="Path to the input audio file (e.g., ../data/Pitch-Sample/sample01.wav)")
-
-    args = parser.parse_args()
-    audio_path = args.audio_path
-
-    # Validate file
-    if not os.path.isfile(audio_path):
-        print(f"❌ Error: File '{audio_path}' does not exist.")
-        sys.exit(1)
-
-    # Export as environment variable (optional) or pass as argument
-    print("🚀 Starting transcription...")
-    subprocess.run(["python3", "src/preprocessing.py", audio_path])
-    
-    # Define paths
-    timestamp_json = "src/tests/timestamp.json"
-    transcription_txt = "src/tests/transcription.txt"
-    analysis_folder = "src/audio_analysis"
-    results_folder = "src/tests/results"
-    os.makedirs(results_folder, exist_ok=True)
-    
-    # Run 3 analysis scripts once
-    print("🧠 Running global analysis scripts...")
-    analysis_scripts_once = [
-        "analyze_profanity.py",
-        "analyze_filler.py",
-        "analyze_volume.py",
-        "analyze_speech_rate.py",
-        "analyze_word_freq.py",
-        "analyze_emotion.py",
-        "analyze_sentence_structure.py"
+def extract_audio(video_path: Path, audio_path: Path):
+    cmd = [
+        "ffmpeg",
+        "-y",                # overwrite if exists
+        "-i", str(video_path),
+        "-vn",               # no video
+        "-acodec", "pcm_s16le",
+        "-ar", "44100",
+        "-ac", "2",
+        str(audio_path)
     ]
-    for script in analysis_scripts_once:
-        script_path = os.path.join(analysis_folder, script)
-        if script == "analyze_volume.py":
-            run_script(script_path, [audio_path])
-        elif script == "analyze_speech_rate.py" or script == "analyze_filler.py":
-            run_script(script_path, [timestamp_json])
-        elif script == "analyze_emotion.py":
-            run_script(script_path, [audio_path, timestamp_json])
-        else:
-            run_script(script_path, [timestamp_json, transcription_txt])
+    print(f"🎬 Extracting audio: {' '.join(cmd)}")
+    subprocess.run(cmd, check=True)
+    print(f"✅ Audio extracted to {audio_path}")
 
-    print("✅ All tasks completed successfully.")
-    
-    # Copy JSON results to public/analysis folder for UI
-    print("📂 Copying result files to UI folder...")
-    src_dir = os.path.join(results_folder)
-    dest_dir = "app/public/analysis"
-    os.makedirs(dest_dir, exist_ok=True)
-    
-    # Clean previous JSON files in destination
-    for existing_file in os.listdir(dest_dir):
-        if existing_file.endswith(".json"):
-            os.remove(os.path.join(dest_dir, existing_file))
-    
-    for filename in os.listdir(src_dir):
-        if filename.endswith(".json"):
-            src_path = os.path.join(src_dir, filename)
-            dest_path = os.path.join(dest_dir, filename)
-            subprocess.run(["cp", src_path, dest_path])
-    print("✅ Copied analysis results to UI folder.")
+def run_script(script: Path, args: list[str]):
+    cmd = ["python3", str(script)] + args
+    print(f"🚀 Running: {' '.join(cmd)}")
+    subprocess.run(cmd, check=True)
 
-    # Copy audio file to UI folder
-    audio_dest_path = os.path.join(dest_dir, "audio.wav")
-    subprocess.run(["cp", audio_path, audio_dest_path])
-    print(f"✅ Copied audio to {audio_dest_path}")
-    
-    # Start the React app
-    print("🚀 Launching React frontend...")
-    os.chdir("app")
-    subprocess.run(["npm", "start"])
+def main():
+    parser = argparse.ArgumentParser(
+        description="Unified runner: video→audio ML pipelines."
+    )
+    parser.add_argument(
+        "--video", "-v", required=True,
+        help="Path to input video file"
+    )
+    args = parser.parse_args()
+
+    video_path = Path(args.video)
+    if not video_path.is_file():
+        print(f"❌ Error: video '{video_path}' not found.")
+        sys.exit(1)
+
+    # 1) extract audio
+    audio_path = Path("output/extracted_audio.wav")
+    try:
+        extract_audio(video_path, audio_path)
+    except subprocess.CalledProcessError:
+        print("❌ ffmpeg failed; aborting.")
+        sys.exit(1)
+
+    # 2) run video automation
+    # try:
+    #     run_script(Path("video_automation.py"), ["--video", str(video_path)])
+    # except subprocess.CalledProcessError:
+    #     print("❌ Video analysis failed; aborting.")
+    #     sys.exit(1)
+
+    # 3) run audio automation (this will also launch React at the end)
+    try:
+        run_script(Path("audio_automation.py"), [str(audio_path)])
+    except subprocess.CalledProcessError:
+        print("❌ Audio analysis failed; aborting.")
+        sys.exit(1)
+
+    print("🎉 All done! If React didn’t start, rerun `npm start` in ./app.")
 
 if __name__ == "__main__":
     main()

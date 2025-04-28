@@ -1,0 +1,22 @@
+[
+    {
+        "sentence": "And refugees with open arms.",
+        "corrected": "And refugees with open arms..",
+        "feedback": "Suggested grammatical improvements"
+    },
+    {
+        "sentence": "But there's some mixed reaction from students just ahead.",
+        "corrected": "But there's some mixed response from students just ahead.",
+        "feedback": "Suggested grammatical improvements"
+    },
+    {
+        "sentence": "We're not live.",
+        "corrected": "We're not living..",
+        "feedback": "Suggested grammatical improvements"
+    },
+    {
+        "sentence": "Mm hmm.",
+        "corrected": "Hmm. I see..",
+        "feedback": "Suggested grammatical improvements"
+    }
+]

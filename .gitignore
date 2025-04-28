@@ -4,7 +4,6 @@ myenv/
 
 # Data files
 data/
-src/tests/
 src/tests_all
 app/public/analysis
 
@@ -13,8 +12,6 @@ models/
 
 # Jupyter notebook checkpoints
 **/.ipynb_checkpoints
-
-models/
 
 # OS-specific junk
 .DS_Store
