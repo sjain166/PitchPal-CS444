@@ -1,83 +1,67 @@
-# Keep your original ArgumentParser exactly as-is
+import os
 import argparse
 import json
-import spacy
-from transformers import pipeline
+from pathlib import Path
+from dotenv import load_dotenv
+from openai import OpenAI
 
-parser = argparse.ArgumentParser(description="Analyze sentence structure and relevance.")
-parser.add_argument("timestamp_path", help="Path to timestamps JSON file")
-parser.add_argument("transcription_path", help="Path to transcription .txt file")
-parser.add_argument("--output_path", default="src/tests/results/sentence_structure_report.json", help="Path to profanity report JSON file")
+# 1. Argument Parsing
+parser = argparse.ArgumentParser(description="Analyze transcript for sentence structure and relevance.")
+parser.add_argument("--transcription_path", default="src/tests/transcription.txt", help="Path to transcription.txt file")
+parser.add_argument("--output_path", default="src/tests/results/sentence_structure_report.json", help="Path to output JSON file")
 args = parser.parse_args()
 
-# Load SpaCy and classifier
-nlp = spacy.load("en_core_web_sm")
-classifier = pipeline("zero-shot-classification", model="cross-encoder/nli-deberta-v3-base")
-grammar_corrector = pipeline("text2text-generation", model="pszemraj/flan-t5-large-grammar-synthesis")
-
-# ---- Load Transcription ----
+# 2. Read transcription
 with open(args.transcription_path, "r") as f:
-    transcription = f.read().strip()
+    transcription = f.read()
 
-# ---- Break into Sentences ----
-doc = nlp(transcription)
-raw_sentences = [sent.text.strip() for sent in doc.sents if len(sent.text.strip()) > 0]
+# 3. Define prompt to send to GPT
+prompt = f"""
+You are given a transcript of an elevator pitch. Break it into meaningful sentences.
+For each sentence, do the following:
+- If it is unrelated to an elevator pitch, return this JSON:
+  {{
+    "sentence": sentence,
+    "feedback": "Off-topic Sentence"
+  }}
+- If it is relevant but unprofessional or grammatically incorrect, return this JSON:
+  {{
+    "sentence": sentence,
+    "corrected": corrected_sentence,
+    "feedback": "Grammatical Improvement"
+  }}
+Return the final output as a JSON array. Transcript:
+\"\"\"{transcription}\"\"\"
+"""
 
-sentences = []
-buffer = ""
+# 4. Call OpenAI API
+client = OpenAI(api_key=os.getenv("OPEN_API_KEY"))
+response = client.chat.completions.create(
+    model="gpt-4o",
+    messages=[
+        {"role": "user", "content": prompt}
+    ]
+)
 
-for sent in raw_sentences:
-    word_count = len(sent.split())
-    ends_with_punct = sent.endswith((".", "!", "?"))
+output_text = response.choices[0].message.content.strip()
+if output_text.startswith("```json"):
+    output_text = output_text.removeprefix("```json").removesuffix("```").strip()
+elif output_text.startswith("```"):
+    output_text = output_text.removeprefix("```").removesuffix("```").strip()
 
-    if word_count < 7 and not ends_with_punct:
-        buffer += " " + sent
-    else:
-        buffer += " " + sent
-        sentences.append(buffer.strip())
-        buffer = ""
+if not output_text:
+    raise ValueError("❌ OpenAI API returned an empty response.")
 
-if buffer.strip():
-    sentences.append(buffer.strip())
+try:
+    parsed = json.loads(output_text)
+except json.JSONDecodeError:
+    print("❌ Failed to parse JSON. Raw output saved to debug_output.txt")
+    with open("debug_output.txt", "w") as f:
+        f.write(output_text)
+    raise
 
-# ---- Define Labels ----
-labels = [
-  "Speaker introduces themselves",
-  "Speaker mentions their education",
-  "Speaker describes technical experience",
-  "Speaker discusses future career goals or interests",
-  "Speaker highlights achievements or personal strengths",
-  "Speaker requests an opportunity like an internship",
-  "Speaker explains their motivation or values",
-  "Speaker makes an off-topic or confusing statement"
-]
-
-# ---- Classify Each Sentence ----
-results = []
-for sentence in sentences:
-    out = classifier(sentence, labels)
-    label = out["labels"][0]
-    raw_score = out["scores"][0]
-
-    # Invert the confidence so that high means more relevant
-    relevance = round(1 - raw_score, 2)
-    if label == "Speaker makes an off-topic or confusing statement":
-        results.append({
-            "sentence": sentence,
-            "relevance": relevance,
-            "feedback": "Off-topic statement"
-        })
-    else:
-        corrected = grammar_corrector(sentence, max_new_tokens=100)[0]["generated_text"].strip()
-        if corrected != sentence.strip():
-            results.append({
-                "sentence": sentence,
-                "corrected": corrected,
-                "feedback": "Suggested grammatical improvements"
-            })
-    
-# ---- Save to JSON ----
+Path(args.output_path).parent.mkdir(parents=True, exist_ok=True)
 with open(args.output_path, "w") as f:
-    json.dump(results, f, indent=4)
+    json.dump(parsed, f, indent=2)
 
-print(f"Saved report to {args.output_path}")
+print(f"✅ Analysis saved to {args.output_path}")

@@ -5,7 +5,10 @@ myenv/
 # Data files
 data/
 src/tests_all
+src/tests/results
 app/public/analysis
+app/src/Extra_Pages/
+.env
 
 # Model
 models/
