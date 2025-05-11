@@ -17,9 +17,12 @@ function App() {
     speed: false,
     inappropriate: false,
     volume: false,
-    frequency: false
+    frequency: false,
+    v_nervous: false,
+    v_eye: false,
+    v_bg: false,
   });
-  const [view, setView] = useState('summary');   // 'summary' by default
+  const [view, setView] = useState('summary');
 
   const [emotionData, setEmotionData] = useState([]);
   const [fillerData, setFillerData] = useState([]);
@@ -30,6 +33,9 @@ function App() {
   const [englishData, setEnglishData] = useState([]);
   const [summary, setSummary] = useState("");
   const [raw_transcribed_text, setRawTranscribedText] = useState("");
+  const [video_nervous, setVideoNervous] = useState([]);
+  const [video_eye, setVideoEye] = useState([]);
+  const [video_bg_noise, setVideoBgNoise] = useState([]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -113,6 +119,24 @@ function App() {
         );
       });
     }
+
+    if(layers['v_nervous']) {
+      video_nervous.forEach(({ start_time, end_time }) =>
+        addHighlight(start_time, end_time, 'v_nervous-highlight')
+      );
+    }
+
+    if(layers['v_eye']) {
+      video_eye.forEach(({ start_time, end_time }) =>
+        addHighlight(start_time, end_time, 'v_eye-highlight')
+      );
+    }
+
+    if(layers['v_bg']) {
+      video_bg_noise.forEach(({ start_time, end_time }) =>
+        addHighlight(start_time, end_time, 'v_bg-highlight')
+      );
+    }
   };
 
   const renderTimestamps = () => {
@@ -147,6 +171,9 @@ function App() {
         setEnglishData(data.sentence_structure_report);
         setRawTranscribedText(data.raw_transcribed_text)
         setSummary(data.feedback)
+        setVideoNervous(data.nervous_timeline);
+        setVideoEye(data.eye_discontact_timeline);
+        setVideoBgNoise(data.background_noise);
       } catch (err) {
         console.error('Failed to load analysis data:', err);
       }
@@ -165,7 +192,10 @@ function App() {
     speed: { backgroundColor: 'rgba(0,255,128,0.3)', borderColor: 'green' },
     inappropriate: { backgroundColor: 'rgba(255,165,0,0.4)', borderColor: 'orange' },
     volume: { backgroundColor: 'rgba(128,0,255,0.3)', borderColor: 'purple' },
-    frequency: { backgroundColor: 'rgba(255,255,0,0.4)', borderColor: '#999933' }
+    frequency: { backgroundColor: 'rgba(255,255,0,0.4)', borderColor: '#999933' },
+    v_nervous: { backgroundColor: 'rgba(255, 0, 255, 0.3)', borderColor: 'purple' },
+    v_eye: { backgroundColor: 'rgba(0, 255, 255, 0.3)', borderColor: 'blue' },
+    v_bg: { backgroundColor: 'rgba(128, 128, 0, 0.3)', borderColor: 'yellow' }
   };
 
   useEffect(() => {
@@ -174,7 +204,7 @@ function App() {
 
   return (
     <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-      <h1>PitchPal - Audio Analysis</h1>
+      <h1>PitchPal - Elevator Pitch Analysis</h1>
       <div style={{ marginTop: '10px' }}>
         <button onClick={() => setView('summary')} disabled={view === 'summary'}>
           Brief Summary
@@ -191,8 +221,8 @@ function App() {
       <div style={{ marginTop: '20px' }}>
         <video
           ref={videoRef}
-          src="/analysis/video.mov"     // put your .mov in /public/analysis/
-          muted                         // prevent double-audio
+          src="/analysis/video.mov"
+          muted
           style={{ width: '100%', maxHeight: 400, marginTop: 10 }}
         />
 
@@ -245,6 +275,9 @@ function App() {
             volumeData={volumeData}
             frequencyData={frequencyData}
             englishData={englishData}
+            v_nervous={video_nervous}
+            v_eye={video_eye}
+            v_bg={video_bg_noise}
           />
         </>
       ) : (

@@ -12,12 +12,15 @@ function AnalysisPanel({
   volumeData,
   frequencyData,
   englishData,
+  v_nervous,
+  v_eye,
+  v_bg
 }) {
   return (
     <div style={{ display: 'flex' }}>
       {/* ---------- Left-hand legend ---------- */}
       <div style={{ width: 250 }}>
-        <strong style={{ display: 'block', marginBottom: '10px' }}>Legend:</strong>
+        <strong style={{ display: 'block', marginBottom: '10px' }}>Audio Legend:</strong>
         {Object.entries({
           emotion: 'emotion detection',
           filler: 'filler words',
@@ -52,7 +55,41 @@ function AnalysisPanel({
             />
           </label>
         ))}
+        <hr style={{ height: 1, backgroundColor: '#e2e8f0', margin: '24px 0' }} />
+        <strong style={{ display: 'block', marginBottom: '10px' }}>Video Legend:</strong>
+        {Object.entries({
+          v_nervous: 'Nervousness',
+          v_eye: 'Poor Eye Contact',
+          v_bg: 'Backgroud Noise'
+        }).map(([key, label]) => (
+          <label
+            key={key}
+            className="legend-item"
+            style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}
+          >
+            <input
+              type="checkbox"
+              checked={layers[key]}
+              onChange={() => toggleLayer(key)}
+              style={{ marginRight: '8px' }}
+            />
+            <span>{label}</span>
+            <span
+              className="legend-color"
+              style={{
+                marginLeft: 'auto',
+                width: '20px',
+                height: '15px',
+                display: 'inline-block',
+                border: '1px solid',
+                backgroundColor: colorMap[key].backgroundColor,
+                borderColor: colorMap[key].borderColor,
+              }}
+            />
+          </label>
+        ))}
       </div>
+      
 
       {/* ---------- Right-hand summaries ---------- */}
       <div style={{ flex: 1, paddingLeft: '80px' }}>
@@ -202,6 +239,62 @@ function AnalysisPanel({
                       <li key={`irrelevant-${idx}`}>{sentence}</li>
                     ))}
                 </ul>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+      <div style={{ flex: 1, paddingLeft: '80px' }}>
+        {audioDuration === 0 && (
+          <div style={{ fontSize: '16px', color: '#888' }}>
+            Upload an video file to view analysis summaries here.
+          </div>
+        )}
+
+        {audioDuration > 0 && (
+          <>
+            {/* Nervousness summary */}
+            <div id="emotionSummary" style={{ marginTop: '15px', fontSize: '16px' }}>
+              <strong>Nervousness:</strong>
+              <br />
+              {v_nervous.length === 0 ? (
+                <div>No nervous data available.</div>
+              ) : (
+                v_nervous.map(({ start_time, end_time }, idx) => (
+                  <div key={idx}>
+                    from {start_time.toFixed(2)}s to {end_time.toFixed(2)}s
+                  </div>
+                ))
+              )}
+            </div>
+            
+            {/* Eye Contact summary */}
+            <div id="emotionSummary" style={{ marginTop: '15px', fontSize: '16px' }}>
+              <strong>Poor Eye Contact:</strong>
+              <br />
+              {v_eye.length === 0 ? (
+                <div>No nervous data available.</div>
+              ) : (
+                v_eye.map(({ start_time, end_time }, idx) => (
+                  <div key={idx}>
+                    from {start_time.toFixed(2)}s to {end_time.toFixed(2)}s
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Background Noise summary */}
+            <div id="emotionSummary" style={{ marginTop: '15px', fontSize: '16px' }}>
+              <strong>Background Noise:</strong>
+              <br />
+              {v_bg.length === 0 ? (
+                <div>No nervous data available.</div>
+              ) : (
+                v_bg.map(({ start_time, end_time }, idx) => (
+                  <div key={idx}>
+                    from {start_time.toFixed(2)}s to {end_time.toFixed(2)}s
+                  </div>
+                ))
               )}
             </div>
           </>
