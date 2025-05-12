@@ -9,6 +9,7 @@ src/tests/results
 app/public/analysis
 app/src/Extra_Pages/
 .env
+output/
 
 # Model
 models/
