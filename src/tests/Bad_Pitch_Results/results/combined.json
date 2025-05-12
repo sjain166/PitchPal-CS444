@@ -1,0 +1,219 @@
+{
+  "filler_report": [
+    {
+      "word": "[UM]",
+      "timestamps": [
+        {
+          "start_time": 7.86,
+          "end_time": 9.22
+        },
+        {
+          "start_time": 17.2,
+          "end_time": 18.46
+        },
+        {
+          "start_time": 29.8,
+          "end_time": 30.22
+        },
+        {
+          "start_time": 32.42,
+          "end_time": 33.38
+        },
+        {
+          "start_time": 43.84,
+          "end_time": 44.44
+        }
+      ]
+    }
+  ],
+  "sentence_structure_report": [
+    {
+      "sentence": "[UM] I'm in a bunch of clubs on campus.",
+      "relevance": 0.69,
+      "feedback": "Off-topic statement"
+    },
+    {
+      "sentence": "I got a B in honors English, which is actually pretty great for that class.",
+      "corrected": "I got a B in English honors, which is actually pretty great for that class.",
+      "feedback": "Suggested grammatical improvements"
+    },
+    {
+      "sentence": "I don't really know what you're looking for, but.",
+      "relevance": 0.05,
+      "feedback": "Off-topic statement"
+    },
+    {
+      "sentence": "[UM] good writing is always a plus.",
+      "corrected": "UM Good writing is always a plus.",
+      "feedback": "Suggested grammatical improvements"
+    },
+    {
+      "sentence": "So [UM] that's about it.",
+      "corrected": "So _um_ that's about it.",
+      "feedback": "Suggested grammatical improvements"
+    },
+    {
+      "sentence": "Thanks.",
+      "corrected": "Thanks!.. . . Thanks.",
+      "feedback": "Suggested grammatical improvements"
+    }
+  ],
+  "word_frequency_report": [],
+  "nervous_timeline": [
+    {
+      "start_time": 0.0,
+      "end_time": 4.96
+    },
+    {
+      "start_time": 5.0,
+      "end_time": 9.96
+    },
+    {
+      "start_time": 10.0,
+      "end_time": 14.96
+    },
+    {
+      "start_time": 15.0,
+      "end_time": 19.96
+    },
+    {
+      "start_time": 20.0,
+      "end_time": 24.96
+    },
+    {
+      "start_time": 25.0,
+      "end_time": 29.96
+    },
+    {
+      "start_time": 30.0,
+      "end_time": 34.96
+    },
+    {
+      "start_time": 35.0,
+      "end_time": 39.96
+    },
+    {
+      "start_time": 40.0,
+      "end_time": 44.96
+    },
+    {
+      "start_time": 45.0,
+      "end_time": 49.12
+    }
+  ],
+  "eye_discontact_timeline": [
+    {
+      "start_time": 10.0,
+      "end_time": 14.96
+    },
+    {
+      "start_time": 25.0,
+      "end_time": 29.96
+    },
+    {
+      "start_time": 40.0,
+      "end_time": 44.96
+    }
+  ],
+  "profanity_report": [],
+  "emotion_analysis": [
+    {
+      "start_time": 0.0,
+      "end_time": 5.26,
+      "predicted_emotion": "neu",
+      "confidence": 0.619,
+      "comment": "possible feedback"
+    },
+    {
+      "start_time": 5.26,
+      "end_time": 10.48,
+      "predicted_emotion": "neu",
+      "confidence": 0.71,
+      "comment": "possible feedback"
+    },
+    {
+      "start_time": 10.48,
+      "end_time": 15.66,
+      "predicted_emotion": "neu",
+      "confidence": 0.771,
+      "comment": "possible feedback"
+    },
+    {
+      "start_time": 15.66,
+      "end_time": 21.24,
+      "predicted_emotion": "neu",
+      "confidence": 0.568,
+      "comment": "possible feedback"
+    },
+    {
+      "start_time": 21.24,
+      "end_time": 26.3,
+      "predicted_emotion": "neu",
+      "confidence": 0.956,
+      "comment": "recommended feedback"
+    },
+    {
+      "start_time": 26.3,
+      "end_time": 31.46,
+      "predicted_emotion": "hap",
+      "confidence": 0.629,
+      "comment": "possible feedback"
+    },
+    {
+      "start_time": 31.46,
+      "end_time": 36.84,
+      "predicted_emotion": "neu",
+      "confidence": 0.655,
+      "comment": "possible feedback"
+    },
+    {
+      "start_time": 36.84,
+      "end_time": 41.94,
+      "predicted_emotion": "hap",
+      "confidence": 0.641,
+      "comment": "possible feedback"
+    }
+  ],
+  "background_noise": [],
+  "volume_report": {
+    "loud": [
+      {
+        "start_time": 9.0,
+        "end_time": 11.0
+      },
+      {
+        "start_time": 22.0,
+        "end_time": 27.0
+      }
+    ],
+    "inaudible": [
+      {
+        "start_time": 0,
+        "end_time": 9.0
+      },
+      {
+        "start_time": 16.0,
+        "end_time": 19.0
+      },
+      {
+        "start_time": 29.0,
+        "end_time": 31.0
+      },
+      {
+        "start_time": 32.0,
+        "end_time": 34.0
+      },
+      {
+        "start_time": 38.0,
+        "end_time": 40.0
+      },
+      {
+        "start_time": 45.0,
+        "end_time": 48.0
+      }
+    ]
+  },
+  "speech_rate_analysis": [],
+  "raw_transcribed_text": "Hi, my name is Logan. I want to get an internship because I think it'll look good on my resume. [UM] I'm a psychology major at WVU. I looked up some internships and yours came up first. [UM] I'm in a bunch of clubs on campus. I'm a good writer. I got a B in honors English, which is actually pretty great for that class. I don't really know what you're looking for, but. [UM] good writing is always a plus. [UM] I haven't actually done research yet, but I should probably learn how, and I think an internship could teach me. So [UM] that's about it. Thanks.",
+  "feedback": "**Strengths:**\n\n1. **Clear Introduction:** The speaker introduces themselves and their intent clearly at the beginning of the speech, stating their name and the desire to secure an internship.\n2. **Relevant Background Information:** The speaker provides relevant background information such as their major and involvement in clubs on campus, which could be beneficial for an internship.\n3. **Acknowledgment of Skills:** The speaker mentions their writing skills, which is a positive attribute for many internships.\n\n**Areas for Improvement:**\n\n1. **Filler Words:** Frequent use of filler words like \"[UM]\" disrupts the flow of speech and can detract from the speaker's confidence and clarity.\n2. **Off-topic Statements:** Some statements, such as involvement in clubs and grade in English, are not directly relevant to the internship application.\n3. **Nervousness Indicators:** The speaker exhibits nervousness throughout the speech, as indicated by the nervous timeline and eye discontact.\n4. **Volume Inconsistencies:** The volume of the speech fluctuates, with some parts being inaudible and others too loud, which can affect the listener's understanding.\n5. **Sentence Structure and Grammar:** There are grammatical errors and awkward sentence structures that need refinement for clarity and professionalism.\n\n**Actionable Feedback:**\n\n1. **Reduce Filler Words:** Practice speaking without filler words by pausing instead. This can be achieved through rehearsing the speech multiple times.\n2. **Focus on Relevance:** Ensure all statements are directly related to the internship and highlight skills or experiences that align with the role.\n3. **Manage Nervousness:** Practice relaxation techniques and rehearse in front of a mirror or with friends to reduce nervousness and improve eye contact.\n4. **Consistent Volume:** Maintain a consistent volume throughout the speech. Recording and listening to the speech can help identify and correct volume issues.\n5. **Refine Sentence Structure:** Review and correct grammatical errors and awkward sentences to enhance clarity and professionalism.\n\n**Polished Version of the Speech:**\n\n\"Hi, my name is Logan. I am eager to secure an internship because it would be a valuable addition to my resume and provide me with practical experience. I am a psychology major at WVU, and I have researched various internships, with yours being my top choice. I am a strong writer and believe that my skills can contribute positively to your team. Although I haven't conducted research yet, I am eager to learn and believe that an internship will provide the perfect opportunity to develop this skill. Thank you for considering my application.\""
+}
