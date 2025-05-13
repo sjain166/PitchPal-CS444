@@ -51,6 +51,8 @@ def main():
             run_script(script_path, [timestamp_json])
         elif script == "analyze_emotion.py":
             run_script(script_path, [audio_path, timestamp_json])
+        elif script == "analyze_sentence_structure.py":
+            run_script(script_path, [transcription_txt])
         else:
             run_script(script_path, [timestamp_json, transcription_txt])
 

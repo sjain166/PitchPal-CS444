@@ -4,6 +4,8 @@ import subprocess
 import sys
 from pathlib import Path
 import json
+import os
+from dotenv import load_dotenv
 from openai import OpenAI
 
 def extract_audio(video_path: Path, audio_path: Path):
@@ -54,7 +56,7 @@ def give_actionable_feedback(combined_path: Path):
 
     print("🧠 Generating feedback with LLM...")
 
-    client = OpenAI(api_key= "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")
+    client = OpenAI(api_key=os.getenv("OPEN_API_KEY"))
     response = client.chat.completions.create(
         model="gpt-4o",  # or any other available model
         messages=[{"role": "user", "content": prompt}],
@@ -97,27 +99,27 @@ def combine_json_outputs(output_dir: Path, combined_path: Path):
     print(f"📦 Combined JSON written to {combined_path}")
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Unified runner: video→audio ML pipelines."
-    )
-    parser.add_argument(
-        "--video", "-v", required=True,
-        help="Path to input video file"
-    )
-    args = parser.parse_args()
+    # parser = argparse.ArgumentParser(
+    #     description="Unified runner: video→audio ML pipelines."
+    # )
+    # parser.add_argument(
+    #     "--video", "-v", required=True,
+    #     help="Path to input video file"
+    # )
+    # args = parser.parse_args()
 
-    video_path = Path(args.video)
-    if not video_path.is_file():
-        print(f"❌ Error: video '{video_path}' not found.")
-        sys.exit(1)
+    # video_path = Path(args.video)
+    # if not video_path.is_file():
+    #     print(f"❌ Error: video '{video_path}' not found.")
+    #     sys.exit(1)
 
     # 1) extract audio
-    audio_path = Path("output/extracted_audio.wav")
-    try:
-        extract_audio(video_path, audio_path)
-    except subprocess.CalledProcessError:
-        print("❌ ffmpeg failed; aborting.")
-        sys.exit(1)
+    # audio_path = Path("output/extracted_audio.wav")
+    # try:
+    #     extract_audio(video_path, audio_path)
+    # except subprocess.CalledProcessError:
+    #     print("❌ ffmpeg failed; aborting.")
+    #     sys.exit(1)
 
     # # 2) run video automation
     # try:
@@ -133,7 +135,7 @@ def main():
     #     print("❌ Audio analysis failed; aborting.")
     #     sys.exit(1)
 
-    output_dir = Path("/Users/sidpro/Desktop/WorkPlace/UIUC/Spring-25/CS 444/PitchPal-CS444/src/tests/Bad_Pitch_Results/results")
+    output_dir = Path("/Users/aryangupta/Desktop/UIUC/CURRENT/CS-444/PitchPal-CS444/src/tests/Submission_Results")
     combined_json_path = output_dir / "combined.json"
     combine_json_outputs(output_dir, combined_json_path)
     give_actionable_feedback(combined_json_path)

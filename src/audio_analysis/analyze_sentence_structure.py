@@ -7,7 +7,7 @@ from openai import OpenAI
 
 # 1. Argument Parsing
 parser = argparse.ArgumentParser(description="Analyze transcript for sentence structure and relevance.")
-parser.add_argument("--transcription_path", default="src/tests/transcription.txt", help="Path to transcription.txt file")
+parser.add_argument("transcription_path", help="Path to transcription.txt file")
 parser.add_argument("--output_path", default="src/tests/results/sentence_structure_report.json", help="Path to output JSON file")
 args = parser.parse_args()
 

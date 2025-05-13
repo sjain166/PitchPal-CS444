@@ -168,7 +168,7 @@ function AnalysisPanel({
             </div>
 
             {/* Volume summary */}
-            <div id="volumeSummary" style={{ marginTop: '15px', fontSize: '16px' }}>
+            {/* <div id="volumeSummary" style={{ marginTop: '15px', fontSize: '16px' }}>
               <strong>Volume Issues:</strong>
               <br />
               {volumeData.inaudible.length === 0 && volumeData.loud.length === 0 ? (
@@ -187,7 +187,7 @@ function AnalysisPanel({
                   ))}
                 </>
               )}
-            </div>
+            </div> */}
 
             {/* Frequency summary */}
             <div id="frequencySummary" style={{ marginTop: '15px', fontSize: '16px' }}>

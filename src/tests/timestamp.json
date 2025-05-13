@@ -2,11 +2,11 @@
     {
         "word": " Hi,",
         "start_time": 0.0,
-        "end_time": 1.84
+        "end_time": 1.86
     },
     {
         "word": " my",
-        "start_time": 1.84,
+        "start_time": 1.86,
         "end_time": 2.16
     },
     {
@@ -502,11 +502,11 @@
     {
         "word": " me.",
         "start_time": 42.24,
-        "end_time": 42.56
+        "end_time": 42.58
     },
     {
         "word": " So",
-        "start_time": 42.56,
+        "start_time": 42.58,
         "end_time": 43.84
     },
     {
