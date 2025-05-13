@@ -14,6 +14,12 @@ output/
 # Model
 models/
 
+# Extra
+src/Extra/Codebase-tried/audio-files/
+src/Extra/emotion-detection-training/Emotion_Speech_Dataset/
+src/Extra/emotion-detection-training/models/
+src/Extra/emotion-detection-training/test_data/
+
 # Jupyter notebook checkpoints
 **/.ipynb_checkpoints
 
