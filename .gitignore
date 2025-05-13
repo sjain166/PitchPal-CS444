@@ -6,7 +6,7 @@ myenv/
 data/
 src/tests_all
 src/tests/results
-app/public/analysis
+# app/public/analysis
 app/src/Extra_Pages/
 .env
 output/

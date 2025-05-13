@@ -1,0 +1,499 @@
+{
+  "filler_report": [
+    {
+      "word": "[UM]",
+      "timestamps": [
+        {
+          "start_time": 7.86,
+          "end_time": 9.22
+        },
+        {
+          "start_time": 17.2,
+          "end_time": 18.46
+        },
+        {
+          "start_time": 29.8,
+          "end_time": 30.22
+        },
+        {
+          "start_time": 32.42,
+          "end_time": 33.38
+        },
+        {
+          "start_time": 43.84,
+          "end_time": 44.44
+        }
+      ]
+    }
+  ],
+  "combined": {
+    "filler_report": [
+      {
+        "word": "[UM]",
+        "timestamps": [
+          {
+            "start_time": 7.86,
+            "end_time": 9.22
+          },
+          {
+            "start_time": 17.2,
+            "end_time": 18.46
+          },
+          {
+            "start_time": 29.8,
+            "end_time": 30.22
+          },
+          {
+            "start_time": 32.42,
+            "end_time": 33.38
+          },
+          {
+            "start_time": 43.84,
+            "end_time": 44.44
+          }
+        ]
+      }
+    ],
+    "sentence_structure_report": [
+      {
+        "sentence": "Hi, my name is Logan.",
+        "feedback": "Off-topic Sentence"
+      },
+      {
+        "sentence": "I want to get an internship because I think it'll look good on my resume.",
+        "corrected": "I am seeking an internship to enhance my resume with practical experience.",
+        "feedback": "Grammatical Improvement"
+      },
+      {
+        "sentence": "[UM] I'm a psychology major at WVU.",
+        "corrected": "I am a psychology major at WVU.",
+        "feedback": "Grammatical Improvement"
+      },
+      {
+        "sentence": "I looked up some internships and yours came up first.",
+        "corrected": "I researched internships and found yours particularly compelling.",
+        "feedback": "Grammatical Improvement"
+      },
+      {
+        "sentence": "[UM] I'm in a bunch of clubs on campus.",
+        "corrected": "I actively participate in several clubs on campus.",
+        "feedback": "Grammatical Improvement"
+      },
+      {
+        "sentence": "I'm a good writer.",
+        "feedback": "Off-topic Sentence"
+      },
+      {
+        "sentence": "I got a B in honors English, which is actually pretty great for that class.",
+        "corrected": "I received a B in honors English, which was a challenging class.",
+        "feedback": "Grammatical Improvement"
+      },
+      {
+        "sentence": "I don't really know what you're looking for, but.",
+        "corrected": "I am eager to learn more about the qualities you seek in an intern.",
+        "feedback": "Grammatical Improvement"
+      },
+      {
+        "sentence": "[UM] good writing is always a plus.",
+        "corrected": "Good writing skills are always beneficial.",
+        "feedback": "Grammatical Improvement"
+      },
+      {
+        "sentence": "[UM] I haven't actually done research yet, but I should probably learn how, and I think an internship could teach me.",
+        "corrected": "I have not yet conducted formal research, but I am eager to learn, and I believe an internship could provide this opportunity.",
+        "feedback": "Grammatical Improvement"
+      },
+      {
+        "sentence": "So [UM] that's about it.",
+        "corrected": "Thank you for considering my application.",
+        "feedback": "Grammatical Improvement"
+      },
+      {
+        "sentence": "Thanks.",
+        "feedback": "Off-topic Sentence"
+      }
+    ],
+    "word_frequency_report": [],
+    "nervous_timeline": [
+      {
+        "start_time": 0.0,
+        "end_time": 4.96
+      },
+      {
+        "start_time": 5.0,
+        "end_time": 9.96
+      },
+      {
+        "start_time": 10.0,
+        "end_time": 14.96
+      },
+      {
+        "start_time": 15.0,
+        "end_time": 19.96
+      },
+      {
+        "start_time": 20.0,
+        "end_time": 24.96
+      },
+      {
+        "start_time": 25.0,
+        "end_time": 29.96
+      },
+      {
+        "start_time": 30.0,
+        "end_time": 34.96
+      },
+      {
+        "start_time": 35.0,
+        "end_time": 39.96
+      },
+      {
+        "start_time": 40.0,
+        "end_time": 44.96
+      },
+      {
+        "start_time": 45.0,
+        "end_time": 49.12
+      }
+    ],
+    "eye_discontact_timeline": [
+      {
+        "start_time": 10.0,
+        "end_time": 14.96
+      },
+      {
+        "start_time": 25.0,
+        "end_time": 29.96
+      },
+      {
+        "start_time": 40.0,
+        "end_time": 44.96
+      }
+    ],
+    "profanity_report": [],
+    "emotion_analysis": [
+      {
+        "start_time": 0.0,
+        "end_time": 5.26,
+        "predicted_emotion": "neu",
+        "confidence": 0.622,
+        "comment": "possible feedback"
+      },
+      {
+        "start_time": 5.26,
+        "end_time": 10.48,
+        "predicted_emotion": "neu",
+        "confidence": 0.71,
+        "comment": "possible feedback"
+      },
+      {
+        "start_time": 10.48,
+        "end_time": 15.66,
+        "predicted_emotion": "neu",
+        "confidence": 0.776,
+        "comment": "possible feedback"
+      },
+      {
+        "start_time": 15.66,
+        "end_time": 21.24,
+        "predicted_emotion": "neu",
+        "confidence": 0.573,
+        "comment": "possible feedback"
+      },
+      {
+        "start_time": 21.24,
+        "end_time": 26.3,
+        "predicted_emotion": "neu",
+        "confidence": 0.956,
+        "comment": "recommended feedback"
+      },
+      {
+        "start_time": 26.3,
+        "end_time": 31.46,
+        "predicted_emotion": "hap",
+        "confidence": 0.625,
+        "comment": "possible feedback"
+      },
+      {
+        "start_time": 31.46,
+        "end_time": 36.84,
+        "predicted_emotion": "neu",
+        "confidence": 0.659,
+        "comment": "possible feedback"
+      },
+      {
+        "start_time": 36.84,
+        "end_time": 41.94,
+        "predicted_emotion": "hap",
+        "confidence": 0.624,
+        "comment": "possible feedback"
+      }
+    ],
+    "background_noise": [],
+    "volume_report": {
+      "loud": [
+        {
+          "start_time": 9.0,
+          "end_time": 11.0
+        },
+        {
+          "start_time": 22.0,
+          "end_time": 27.0
+        }
+      ],
+      "inaudible": [
+        {
+          "start_time": 0,
+          "end_time": 5.0
+        },
+        {
+          "start_time": 7.0,
+          "end_time": 9.0
+        },
+        {
+          "start_time": 16.0,
+          "end_time": 19.0
+        },
+        {
+          "start_time": 29.0,
+          "end_time": 31.0
+        },
+        {
+          "start_time": 32.0,
+          "end_time": 34.0
+        },
+        {
+          "start_time": 38.0,
+          "end_time": 40.0
+        },
+        {
+          "start_time": 45.0,
+          "end_time": 48.0
+        }
+      ]
+    },
+    "speech_rate_analysis": [],
+    "feedback": "**Understanding the Speaker's Intent and Context**\n\nThe speaker, Logan, is presenting an elevator pitch for an internship opportunity. The primary goal is to convey qualifications and enthusiasm for the role, while emphasizing the desire to gain practical experience that will enhance their resume and skills.\n\n**Strengths**\n\n1. **Intent Clarity**: Logan clearly articulates the purpose of seeking an internship, which is to gain practical experience and improve their resume.\n2. **Engagement in Activities**: Mentioning active participation in campus clubs indicates initiative and involvement, which are positive traits for an intern.\n3. **Acknowledgement of Skill Development Needs**: Logan expresses a willingness to learn, particularly in research, which is an important quality for an intern.\n\n**Areas for Improvement**\n\n1. **Filler Words**: Frequent use of filler words like \"[UM]\" detracts from the professionalism and clarity of the pitch.\n2. **Sentence Structure and Grammar**: Several sentences require grammatical improvements and restructuring for clarity and professionalism.\n3. **Nervousness and Eye Contact**: Persistent nervousness and intermittent eye discontact suggest a lack of confidence. These are crucial in making a strong impression.\n4. **Volume Consistency**: The volume fluctuates between loud and inaudible, which can make it difficult for the listener to follow the speech.\n5. **Off-topic Sentences**: Some sentences, such as the mention of getting a B in honors English, do not directly contribute to the main message.\n\n**Actionable Feedback**\n\n1. **Reduce Filler Words**: Practice the speech multiple times to reduce reliance on filler words. This will help in delivering a more confident and fluent pitch.\n2. **Enhance Sentence Structure**: Use the corrected sentences provided to improve grammatical accuracy and clarity.\n3. **Build Confidence**: Practice maintaining eye contact and managing nervousness through mock presentations or speaking in front of a mirror.\n4. **Control Volume**: Record practice sessions to monitor volume levels, ensuring they remain consistent and clear throughout the speech.\n5. **Focus on Relevant Information**: Eliminate off-topic sentences and ensure every statement directly supports the intent of the pitch.\n\n**Polished Version of the Speech**\n\n\"Hello, my name is Logan. I am a psychology major at WVU, actively participating in several clubs on campus. I am seeking an internship to enhance my resume with practical experience. I researched internships and found yours particularly compelling. Although I have not yet conducted formal research, I am eager to learn, and I believe an internship could provide this opportunity. I am also confident that my good writing skills are beneficial. Thank you for considering my application.\""
+  },
+  "sentence_structure_report": [
+    {
+      "sentence": "Hi, my name is Logan.",
+      "feedback": "Off-topic Sentence"
+    },
+    {
+      "sentence": "I want to get an internship because I think it'll look good on my resume.",
+      "corrected": "I am seeking an internship to enhance my resume with practical experience.",
+      "feedback": "Grammatical Improvement"
+    },
+    {
+      "sentence": "[UM] I'm a psychology major at WVU.",
+      "corrected": "I am a psychology major at WVU.",
+      "feedback": "Grammatical Improvement"
+    },
+    {
+      "sentence": "I looked up some internships and yours came up first.",
+      "corrected": "I researched internships and found yours particularly compelling.",
+      "feedback": "Grammatical Improvement"
+    },
+    {
+      "sentence": "[UM] I'm in a bunch of clubs on campus.",
+      "corrected": "I actively participate in several clubs on campus.",
+      "feedback": "Grammatical Improvement"
+    },
+    {
+      "sentence": "I'm a good writer.",
+      "feedback": "Off-topic Sentence"
+    },
+    {
+      "sentence": "I got a B in honors English, which is actually pretty great for that class.",
+      "corrected": "I received a B in honors English, which was a challenging class.",
+      "feedback": "Grammatical Improvement"
+    },
+    {
+      "sentence": "I don't really know what you're looking for, but.",
+      "corrected": "I am eager to learn more about the qualities you seek in an intern.",
+      "feedback": "Grammatical Improvement"
+    },
+    {
+      "sentence": "[UM] good writing is always a plus.",
+      "corrected": "Good writing skills are always beneficial.",
+      "feedback": "Grammatical Improvement"
+    },
+    {
+      "sentence": "[UM] I haven't actually done research yet, but I should probably learn how, and I think an internship could teach me.",
+      "corrected": "I have not yet conducted formal research, but I am eager to learn, and I believe an internship could provide this opportunity.",
+      "feedback": "Grammatical Improvement"
+    },
+    {
+      "sentence": "So [UM] that's about it.",
+      "corrected": "Thank you for considering my application.",
+      "feedback": "Grammatical Improvement"
+    },
+    {
+      "sentence": "Thanks.",
+      "feedback": "Off-topic Sentence"
+    }
+  ],
+  "word_frequency_report": [],
+  "nervous_timeline": [
+    {
+      "start_time": 0.0,
+      "end_time": 4.96
+    },
+    {
+      "start_time": 5.0,
+      "end_time": 9.96
+    },
+    {
+      "start_time": 10.0,
+      "end_time": 14.96
+    },
+    {
+      "start_time": 15.0,
+      "end_time": 19.96
+    },
+    {
+      "start_time": 20.0,
+      "end_time": 24.96
+    },
+    {
+      "start_time": 25.0,
+      "end_time": 29.96
+    },
+    {
+      "start_time": 30.0,
+      "end_time": 34.96
+    },
+    {
+      "start_time": 35.0,
+      "end_time": 39.96
+    },
+    {
+      "start_time": 40.0,
+      "end_time": 44.96
+    },
+    {
+      "start_time": 45.0,
+      "end_time": 49.12
+    }
+  ],
+  "eye_discontact_timeline": [
+    {
+      "start_time": 10.0,
+      "end_time": 14.96
+    },
+    {
+      "start_time": 25.0,
+      "end_time": 29.96
+    },
+    {
+      "start_time": 40.0,
+      "end_time": 44.96
+    }
+  ],
+  "profanity_report": [],
+  "emotion_analysis": [
+    {
+      "start_time": 0.0,
+      "end_time": 5.26,
+      "predicted_emotion": "neu",
+      "confidence": 0.622,
+      "comment": "possible feedback"
+    },
+    {
+      "start_time": 5.26,
+      "end_time": 10.48,
+      "predicted_emotion": "neu",
+      "confidence": 0.71,
+      "comment": "possible feedback"
+    },
+    {
+      "start_time": 10.48,
+      "end_time": 15.66,
+      "predicted_emotion": "neu",
+      "confidence": 0.776,
+      "comment": "possible feedback"
+    },
+    {
+      "start_time": 15.66,
+      "end_time": 21.24,
+      "predicted_emotion": "neu",
+      "confidence": 0.573,
+      "comment": "possible feedback"
+    },
+    {
+      "start_time": 21.24,
+      "end_time": 26.3,
+      "predicted_emotion": "neu",
+      "confidence": 0.956,
+      "comment": "recommended feedback"
+    },
+    {
+      "start_time": 26.3,
+      "end_time": 31.46,
+      "predicted_emotion": "hap",
+      "confidence": 0.625,
+      "comment": "possible feedback"
+    },
+    {
+      "start_time": 31.46,
+      "end_time": 36.84,
+      "predicted_emotion": "neu",
+      "confidence": 0.659,
+      "comment": "possible feedback"
+    },
+    {
+      "start_time": 36.84,
+      "end_time": 41.94,
+      "predicted_emotion": "hap",
+      "confidence": 0.624,
+      "comment": "possible feedback"
+    }
+  ],
+  "background_noise": [],
+  "volume_report": {
+    "loud": [
+      {
+        "start_time": 9.0,
+        "end_time": 11.0
+      },
+      {
+        "start_time": 22.0,
+        "end_time": 27.0
+      }
+    ],
+    "inaudible": [
+      {
+        "start_time": 0,
+        "end_time": 5.0
+      },
+      {
+        "start_time": 7.0,
+        "end_time": 9.0
+      },
+      {
+        "start_time": 16.0,
+        "end_time": 19.0
+      },
+      {
+        "start_time": 29.0,
+        "end_time": 31.0
+      },
+      {
+        "start_time": 32.0,
+        "end_time": 34.0
+      },
+      {
+        "start_time": 38.0,
+        "end_time": 40.0
+      },
+      {
+        "start_time": 45.0,
+        "end_time": 48.0
+      }
+    ]
+  },
+  "speech_rate_analysis": [],
+  "raw_transcribed_text": "Hi, my name is Logan. I want to get an internship because I think it'll look good on my resume. [UM] I'm a psychology major at WVU. I looked up some internships and yours came up first. [UM] I'm in a bunch of clubs on campus. I'm a good writer. I got a B in honors English, which is actually pretty great for that class. I don't really know what you're looking for, but. [UM] good writing is always a plus. [UM] I haven't actually done research yet, but I should probably learn how, and I think an internship could teach me. So [UM] that's about it. Thanks.",
+  "feedback": "**Understanding the Speaker's Intent and Context**\n\nLogan is delivering an elevator pitch to secure an internship. The primary aim is to communicate qualifications and enthusiasm for the opportunity, emphasizing the desire to gain practical experience that will enhance their resume and skills.\n\n**Strengths**\n\n1. **Intent Clarity**: Logan articulates the purpose of seeking an internship, which is to gain practical experience and improve their resume.\n2. **Engagement in Activities**: Mentioning active participation in campus clubs indicates initiative and involvement, which are positive traits for an intern.\n3. **Acknowledgement of Skill Development Needs**: Logan expresses a willingness to learn, particularly in research, which is an important quality for an intern.\n\n**Areas for Improvement**\n\n1. **Filler Words**: Frequent use of filler words like \"[UM]\" detracts from the professionalism and clarity of the pitch.\n2. **Sentence Structure and Grammar**: Several sentences require grammatical improvements and restructuring for clarity and professionalism.\n3. **Nervousness and Eye Contact**: Persistent nervousness and intermittent eye discontact suggest a lack of confidence. These are crucial in making a strong impression.\n4. **Volume Consistency**: The volume fluctuates between loud and inaudible, which can make it difficult for the listener to follow the speech.\n5. **Off-topic Sentences**: Some sentences, such as the mention of getting a B in honors English, do not directly contribute to the main message.\n\n**Actionable Feedback**\n\n1. **Reduce Filler Words**: Practice the speech multiple times to reduce reliance on filler words. This will help in delivering a more confident and fluent pitch.\n2. **Enhance Sentence Structure**: Use the corrected sentences provided to improve grammatical accuracy and clarity.\n3. **Build Confidence**: Practice maintaining eye contact and managing nervousness through mock presentations or speaking in front of a mirror.\n4. **Control Volume**: Record practice sessions to monitor volume levels, ensuring they remain consistent and clear throughout the speech.\n5. **Focus on Relevant Information**: Eliminate off-topic sentences and ensure every statement directly supports the intent of the pitch.\n\n**Polished Version of the Speech**\n\n\"Hello, my name is Logan. I am a psychology major at WVU, actively participating in several clubs on campus. I am seeking an internship to enhance my resume with practical experience. I researched internships and found yours particularly compelling. Although I have not yet conducted formal research, I am eager to learn, and I believe an internship could provide this opportunity. I am also confident that my good writing skills are beneficial. Thank you for considering my application.\""
+}

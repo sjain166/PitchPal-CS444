@@ -1,0 +1,27 @@
+[
+    {
+        "word": "[UM]",
+        "timestamps": [
+            {
+                "start_time": 7.86,
+                "end_time": 9.22
+            },
+            {
+                "start_time": 17.2,
+                "end_time": 18.46
+            },
+            {
+                "start_time": 29.8,
+                "end_time": 30.22
+            },
+            {
+                "start_time": 32.42,
+                "end_time": 33.38
+            },
+            {
+                "start_time": 43.84,
+                "end_time": 44.44
+            }
+        ]
+    }
+]

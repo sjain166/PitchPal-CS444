@@ -1,0 +1,42 @@
+{
+    "loud": [
+        {
+            "start_time": 9.0,
+            "end_time": 11.0
+        },
+        {
+            "start_time": 22.0,
+            "end_time": 27.0
+        }
+    ],
+    "inaudible": [
+        {
+            "start_time": 0,
+            "end_time": 5.0
+        },
+        {
+            "start_time": 7.0,
+            "end_time": 9.0
+        },
+        {
+            "start_time": 16.0,
+            "end_time": 19.0
+        },
+        {
+            "start_time": 29.0,
+            "end_time": 31.0
+        },
+        {
+            "start_time": 32.0,
+            "end_time": 34.0
+        },
+        {
+            "start_time": 38.0,
+            "end_time": 40.0
+        },
+        {
+            "start_time": 45.0,
+            "end_time": 48.0
+        }
+    ]
+}
